@@ -3,7 +3,7 @@
 #include <SipServer.hpp>
 
 int main() {
-    SipServer a;
-    std::cout << a.port;
+    SipServer server;
+    server.run();
     return 0;
 }

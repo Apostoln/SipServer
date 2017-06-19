@@ -5,7 +5,7 @@
 #include <asio.hpp>
 
 class SipServer {
-    public:
+    private:
         asio::io_service* serverIo;
         asio::ip::udp::socket* serverSocket;
         unsigned short port;
@@ -13,7 +13,8 @@ class SipServer {
         SipServer(asio::io_service* ioService, unsigned short port) {
             this->serverIo = ioService;
             this->port = port;
-            this->serverSocket = new asio::ip::udp::socket(*serverIo, asio::ip::udp::endpoint(asio::ip::udp::v4(), port));
+            this->serverSocket = new asio::ip::udp::socket(*serverIo,
+                                                           asio::ip::udp::endpoint(asio::ip::udp::v4(), port));
             if(port == 0) {
                 this->port = serverSocket->local_endpoint().port();
             }
@@ -30,6 +31,23 @@ class SipServer {
         ~SipServer() {
             delete(serverSocket);
             delete(serverIo);
+        }
+
+        unsigned short getPort() {
+            return port;
+        }
+
+        void run() {
+            asio::ip::udp::endpoint clientEndPoint;
+            std::cout << "Server is started" << std::endl
+                      << "Listening udp port " << this->getPort() << std::endl;
+            while(true) {
+                char buff[1024] = {0};
+                size_t bytes = serverSocket->receive_from(asio::buffer(buff), clientEndPoint);
+                if (bytes != 0) {
+                    std::cout << buff << std::endl;
+                }
+            }
         }
 
 };
