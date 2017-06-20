@@ -51,6 +51,7 @@ void SipServer::run() {
         //Amount of received bytes
         size_t bytes = serverSocket->receive_from(asio::buffer(buff), clientEndPoint);
         if (bytes != 0) {
+            serverSocket->send_to(asio::buffer(buff), clientEndPoint);
             std::cout << buff << std::endl;
             if (std::string(buff) == "q") {
                 std::cout << "Server is closed" << std::endl;
