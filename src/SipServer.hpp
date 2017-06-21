@@ -2,8 +2,6 @@
 #ifndef SIPSERVER_SIPSERVER_HPP
 #define SIPSERVER_SIPSERVER_HPP
 
-#include <thread>
-
 #include <asio/io_service.hpp>
 #include <asio/ip/udp.hpp>
 
