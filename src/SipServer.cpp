@@ -10,8 +10,7 @@ SipServer::SipServer(asio::io_service* ioService, unsigned short port) {
     // If server port value is 0, system set for new socket any free and allowed udp port.
     this->serverIo = ioService;
     this->port = port;
-    this->serverSocket = new asio::ip::udp::socket(*serverIo,
-                                                   asio::ip::udp::endpoint(asio::ip::udp::v4(), port));
+    this->updateSocket(asio::ip::udp::endpoint(asio::ip::udp::v4(), port));
 
     // If port is not specified by user, we should find a port number that actually assigned to socket;
     if(port == 0) {
@@ -38,6 +37,22 @@ unsigned short SipServer::getPort() {
 
 void SipServer::setPort(unsigned short port) {
     this->port=port;
+    this->updateSocket(asio::ip::udp::endpoint(asio::ip::udp::v4(), port));
+}
+
+void SipServer::updateSocket(asio::ip::udp::endpoint endPoint) {
+    try {
+        this->serverSocket = new asio::ip::udp::socket(*serverIo, endPoint);
+    }
+    catch(asio::system_error & e) {
+        std::cerr << e.what() << std::endl;
+        std::cerr << "Port is unavailable" << std::endl;
+
+        if (port < 1024) {
+            std::cerr << "Port must be > 1024 on Unix" << std::endl;
+        }
+        exit(1);
+    }
 }
 
 void SipServer::run() {
@@ -62,5 +77,7 @@ void SipServer::run() {
         }
     }
 }
+
+
 
 

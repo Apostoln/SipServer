@@ -17,6 +17,7 @@ class SipServer {
         ~SipServer();
         unsigned short getPort();
         void setPort(unsigned short port);
+        void updateSocket(asio::ip::udp::endpoint endPoint);
         void run();
 };
 
