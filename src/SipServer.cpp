@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <algorithm>
 
 #include <SipServer.hpp>
 
@@ -44,7 +45,7 @@ void SipServer::updateSocket(asio::ip::udp::endpoint endPoint) {
     try {
         this->serverSocket = new asio::ip::udp::socket(*serverIo, endPoint);
     }
-    catch(asio::system_error & e) {
+    catch (asio::system_error & e) {
         std::cerr << e.what() << std::endl;
         std::cerr << "Port is unavailable" << std::endl;
 
@@ -65,17 +66,38 @@ void SipServer::run() {
         char buff[1024] = {0};
         //Amount of received bytes
         size_t bytes = serverSocket->receive_from(asio::buffer(buff), clientEndPoint);
+
+        //Add new connection if it is not exist
+        if (std::find(clients.begin(), clients.end(), clientEndPoint) == clients.end()) {
+            clients.push_back(clientEndPoint);
+            std::cout << "Client was added: " << clientEndPoint.address() << ":" << clientEndPoint.port() << std::endl;
+        }
+
         if (bytes != 0) {
             serverSocket->send_to(asio::buffer(buff), clientEndPoint);
             std::cout << clientEndPoint.address() << ":"
                       << clientEndPoint.port() << "> "
                       << buff << std::endl;
+
             if (std::string(buff) == "q") {
-                std::cout << "Server is closed" << std::endl;
-                return;
+                //Remove closed connection from vector
+                removeClient(clientEndPoint);
             }
         }
     }
+}
+
+void SipServer::removeClient(asio::ip::udp::endpoint& client) {
+    std::cout << "Connection with " << client.address() << ":" << client.port()
+              << " is closed" << std::endl;
+
+    clients.erase(std::remove(clients.begin(), clients.end(), client), clients.end());
+    if (clients.empty()) {
+        std::cout << "There are no connections now, server is closed" << std::endl;
+        serverSocket->close();
+        exit(0);
+    }
+
 }
 
 
