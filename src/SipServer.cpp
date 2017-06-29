@@ -97,7 +97,6 @@ void SipServer::removeClient(asio::ip::udp::endpoint& client) {
         serverSocket->close();
         exit(0);
     }
-
 }
 
 
