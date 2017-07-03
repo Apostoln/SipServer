@@ -124,8 +124,8 @@ if __name__ == '__main__':
     parser.add_argument('-a','--address', required='True', help='IP address')
     parser.add_argument('-p', '--port', required='True', help='Port of SipServer')
     parser.add_argument('-i', '--interface', required='True', help='Network interface')
-    parser.add_argument('-s', '--sipserver', required='True', help='Path to SipServer')
-    parser.add_argument('-l', '--loglevel')
+    parser.add_argument('-s', '--sipserver', help='Path to SipServer')
+    parser.add_argument('-l', '--loglevel', help='Logger level')
     args = parser.parse_args()
 
     address = args.address

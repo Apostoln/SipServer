@@ -50,7 +50,7 @@ void SipServer::updateSocket(asio::ip::udp::endpoint endPoint) {
         std::cerr << "Port is unavailable" << std::endl;
 
         if (port < 1024) {
-            std::cerr << "Port must be > 1024 on Unix" << std::endl;
+            std::cerr << "Port must be > 1024 on Unix, port is" << port << std::endl;
         }
         exit(1);
     }
