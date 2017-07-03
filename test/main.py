@@ -1,10 +1,8 @@
-import sys
 import socket
 import subprocess
 import time
 import platform
-
-DEBUG = False
+import argparse
 
 def test(testFunction):
     resultTest = testFunction()
@@ -15,7 +13,7 @@ def testPortListening():
     command = [path, port]
     result = subprocess.Popen(command, stdout=subprocess.PIPE)
     clientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    time.sleep(0.5)
+    time.sleep(0.1)
     messages = ['Hello', 'World', 'q']
     if DEBUG:
         for m in messages:
@@ -33,7 +31,7 @@ def testPortListening():
 def testPortListeningMultiConnection():
     command = [path, port]
     result = subprocess.Popen(command, stdout=subprocess.PIPE)
-    time.sleep(0.5)
+    time.sleep(0.1)
     messages = ['Hello', 'World', 'q']
     amountClients = 3
     sockets = [socket.socket(socket.AF_INET, socket.SOCK_DGRAM) for _ in range(amountClients)]
@@ -58,7 +56,7 @@ def testPortListeningUsedPort():
     command = [path, str(usedPort)]
     result = subprocess.Popen(command, stdout=subprocess.PIPE)
     clientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    time.sleep(0.5)
+    time.sleep(0.1)
     messages = ['Hello', 'World', 'q']
     if DEBUG:
         for m in messages:
@@ -76,7 +74,7 @@ def testPortListeningUnavailablePort():
     command = [path, '54', port]
     result = subprocess.Popen(command, stdout=subprocess.PIPE)
     clientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    time.sleep(0.5)
+    time.sleep(0.1)
     return result.returncode != 0
 
 def testPortListeningSpecificInterface():
@@ -87,7 +85,7 @@ def testEcho():
     command = [path, port]
     result = subprocess.Popen(command, stdout=subprocess.PIPE)
     clientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    time.sleep(0.5)
+    time.sleep(0.1)
     messages = ['Hello', 'World', 'q']
     if DEBUG:
         for m in messages:
@@ -104,7 +102,7 @@ def testEcho():
 def testEchoMultiConnection():
     command = [path, port]
     result = subprocess.Popen(command, stdout=subprocess.PIPE)
-    time.sleep(0.5)
+    time.sleep(0.1)
     messages = ['Hello', 'World', 'q']
     amountClients = 3
     sockets = [socket.socket(socket.AF_INET, socket.SOCK_DGRAM) for _ in range(amountClients)]
@@ -121,13 +119,20 @@ def testEchoMultiConnection():
 
 
 if __name__ == '__main__':
-    address = sys.argv[1]
-    port = sys.argv[2]
-    path = sys.argv[3]
-    try:
-        DEBUG = sys.argv[4]
-    except IndexError:
-        DEBUG = False
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('-a','--address', required='True', help='IP address')
+    parser.add_argument('-p', '--port', required='True', help='Port of SipServer')
+    parser.add_argument('-i', '--interface', required='True', help='Network interface')
+    parser.add_argument('-s', '--sipserver', required='True', help='Path to SipServer')
+    parser.add_argument('-l', '--loglevel')
+    args = parser.parse_args()
+
+    address = args.address
+    port = args.port
+    path = args.sipserver
+    interface = args.interface
+    DEBUG = True if args.loglevel else False
 
     serverEndPoint = (address, int(port))
     print(address, port, path)
