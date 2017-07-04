@@ -5,27 +5,26 @@
 
 #include <SipServer.hpp>
 
-// Delegating constructors
-SipServer::SipServer(asio::io_service* ioService, unsigned short port) {
+
+SipServer::SipServer(asio::io_service* ioService, asio::ip::address networkInterface, unsigned short port) {
     // Server port is 0 on default if other value is not specified on constructor arguments.
     // If server port value is 0, system set for new socket any free and allowed udp port.
     this->serverIo = ioService;
+    this->networkInterface = networkInterface;
     this->port = port;
-    this->updateSocket(asio::ip::udp::endpoint(asio::ip::udp::v4(), port));
+
+    if (networkInterface.is_unspecified()) {
+        this->updateSocket(asio::ip::udp::endpoint(asio::ip::udp::v4(), port));
+    }
+    else {
+        this->updateSocket(asio::ip::udp::endpoint(networkInterface, port));
+    }
 
     // If port is not specified by user, we should find a port number that actually assigned to socket;
     if(port == 0) {
         this->port = serverSocket->local_endpoint().port();
     }
 }
-
-SipServer::SipServer(unsigned short port):
-        SipServer(new asio::io_service, port)
-{}
-
-SipServer::SipServer():
-        SipServer(0)
-{}
 
 SipServer::~SipServer() {
     delete(serverSocket);
@@ -46,6 +45,7 @@ void SipServer::updateSocket(asio::ip::udp::endpoint endPoint) {
         this->serverSocket = new asio::ip::udp::socket(*serverIo, endPoint);
     }
     catch (asio::system_error & e) {
+        //TODO: Handling incorrect network
         std::cerr << e.what() << std::endl;
         std::cerr << "Port is unavailable" << std::endl;
 

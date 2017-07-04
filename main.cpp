@@ -3,13 +3,18 @@
 
 int main(int argc, char* argv[]) {
     //TODO: Args parsing
-    //TODO: Using builders
+
     SipServer::Builder sipServerBuilder;
-    if (argc != 1) {
+    if (argc >= 2) {
         // Create with specified port from main function arguments.
         auto port = (unsigned short) std::atoi(argv[1]);
         sipServerBuilder.setPort(port);
     }
+    if (argc >= 3) {
+        auto networkInterface = argv[2];
+        sipServerBuilder.setNetworkInterface(networkInterface);
+    }
+
     SipServer server = sipServerBuilder.build();
     server.run();
     return 0;
