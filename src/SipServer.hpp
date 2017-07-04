@@ -18,9 +18,7 @@ class SipServer {
     public:
         class Builder;
 
-        SipServer(asio::io_service* ioService, unsigned short port);
-        SipServer(unsigned short port);
-        SipServer();
+        SipServer(asio::io_service* ioService, asio::ip::address networkInterface, unsigned short port);
         ~SipServer();
         unsigned short getPort();
         void setPort(unsigned short port);

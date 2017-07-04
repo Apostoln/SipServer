@@ -21,7 +21,14 @@ Builder Builder::setNetworkInterface(asio::ip::address networkInterface) {
     return *this;
 }
 
+Builder Builder::setNetworkInterface(char *string) {
+    this->networkInterface = asio::ip::address::from_string(string);
+    return *this;
+}
+
 SipServer Builder::build() {
     //TODO: Network inerface
-    return SipServer(serverIo, port);
+    return SipServer(serverIo, networkInterface, port);
 }
+
+

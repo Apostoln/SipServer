@@ -15,6 +15,7 @@ class SipServer::Builder {
         Builder setIoService(asio::io_service* serverIo);
         Builder setPort(unsigned short port);
         Builder setNetworkInterface(asio::ip::address networkInterface);
+        Builder setNetworkInterface(char* string);
         SipServer build();
 };
 
