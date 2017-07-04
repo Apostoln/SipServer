@@ -1,19 +1,16 @@
 #include <SipServer.hpp>
+#include <Builder.hpp>
 
 int main(int argc, char* argv[]) {
     //TODO: Args parsing
     //TODO: Using builders
-    SipServer* server;
-    if (argc == 1) {
-        // Server port is 0 on default if other value is not specified on main function arguments.
-        // If port value is 0, system set for socket any free and allowed port.
-        server = new SipServer();
-    }
-    else {
+    SipServer::Builder sipServerBuilder;
+    if (argc != 1) {
         // Create with specified port from main function arguments.
         auto port = (unsigned short) std::atoi(argv[1]);
-        server = new SipServer(port);
+        sipServerBuilder.setPort(port);
     }
-    server->run();
+    SipServer server = sipServerBuilder.build();
+    server.run();
     return 0;
 }
