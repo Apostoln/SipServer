@@ -12,9 +12,12 @@ class SipServer {
         asio::io_service* serverIo; // Object for connecting to I/O services of OS.
         asio::ip::udp::socket* serverSocket;
         unsigned short port;
+        asio::ip::address networkInterface;
         std::vector<asio::ip::udp::endpoint> clients;
 
     public:
+        class Builder;
+
         SipServer(asio::io_service* ioService, unsigned short port);
         SipServer(unsigned short port);
         SipServer();

@@ -1,6 +1,8 @@
 #include <SipServer.hpp>
 
 int main(int argc, char* argv[]) {
+    //TODO: Args parsing
+    //TODO: Using builders
     SipServer* server;
     if (argc == 1) {
         // Server port is 0 on default if other value is not specified on main function arguments.
