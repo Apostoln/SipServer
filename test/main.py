@@ -91,8 +91,40 @@ def testPortListeningUnavailablePort():
 def testPortListeningSpecificInterface():
     if DEBUG:
         print(sys._getframe().f_code.co_name)
-    #TODO
-    pass
+    networkInterface ='192.168.64.100'
+    endPoint = (networkInterface, serverEndPoint[1])
+    print(endPoint)
+    command = [path, port, networkInterface]
+
+    result = subprocess.Popen(command, stdout=subprocess.PIPE)
+    clientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    time.sleep(0.1)
+    messages = ['Hello', 'World', 'q']
+
+    if DEBUG:
+        for m in messages:
+            print('< ', m)
+
+    for m in messages:
+        clientSocket.sendto(m.encode(), endPoint)
+
+
+    stdoutResult = [x.decode() for x in result.stdout]
+
+    if DEBUG:
+        for r in stdoutResult:
+            print('> ', r[:-1])
+
+    return all(any(r.find(m) != -1 for r in stdoutResult) for m in messages)
+
+def testPortListeningSpecificInterfaceUnavailable():
+    if DEBUG:
+        print(sys._getframe().f_code.co_name)
+    command = [path, '0', '1.2.3.4']
+    result = subprocess.Popen(command, stdout=subprocess.PIPE)
+    time.sleep(0.1)
+    return result.returncode != 0
+
 
 def testEcho():
     if DEBUG:
@@ -157,5 +189,7 @@ if __name__ == '__main__':
     test(testPortListeningMultiConnection)
     test(testPortListeningUnavailablePort)
     test(testPortListeningUsedPort)
+    test(testPortListeningSpecificInterface)
+    test(testPortListeningSpecificInterfaceUnavailable)
     test(testEcho)
     test(testEchoMultiConnection)
