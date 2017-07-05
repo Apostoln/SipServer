@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+
+import sys
 import socket
 import subprocess
 import time
@@ -10,6 +13,8 @@ def test(testFunction):
     return resultTest
 
 def testPortListening():
+    if DEBUG:
+        print(sys._getframe().f_code.co_name)
     command = [path, port]
     result = subprocess.Popen(command, stdout=subprocess.PIPE)
     clientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -29,6 +34,8 @@ def testPortListening():
     return False
 
 def testPortListeningMultiConnection():
+    if DEBUG:
+        print(sys._getframe().f_code.co_name)
     command = [path, port]
     result = subprocess.Popen(command, stdout=subprocess.PIPE)
     time.sleep(0.1)
@@ -49,6 +56,8 @@ def testPortListeningMultiConnection():
     return False
 
 def testPortListeningUsedPort():
+    if DEBUG:
+        print(sys._getframe().f_code.co_name)
     usedSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     usedSocket.sendto("q".encode(), serverEndPoint)
     usedPort = usedSocket.getsockname()[-1]
@@ -66,22 +75,28 @@ def testPortListeningUsedPort():
     return result.returncode != 0
 
 def testPortListeningUnavailablePort():
+    if DEBUG:
+        print(sys._getframe().f_code.co_name)
     osType = platform.system()
     if DEBUG:
         print("OS is", osType)
     if osType != 'Linux':
         return True
-    command = [path, '54', port]
+    command = [path, '54']
     result = subprocess.Popen(command, stdout=subprocess.PIPE)
     clientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     time.sleep(0.1)
     return result.returncode != 0
 
 def testPortListeningSpecificInterface():
+    if DEBUG:
+        print(sys._getframe().f_code.co_name)
     #TODO
     pass
 
 def testEcho():
+    if DEBUG:
+        print(sys._getframe().f_code.co_name)
     command = [path, port]
     result = subprocess.Popen(command, stdout=subprocess.PIPE)
     clientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -100,6 +115,8 @@ def testEcho():
     return data == messages
 
 def testEchoMultiConnection():
+    if DEBUG:
+        print(sys._getframe().f_code.co_name)
     command = [path, port]
     result = subprocess.Popen(command, stdout=subprocess.PIPE)
     time.sleep(0.1)
@@ -123,8 +140,8 @@ if __name__ == '__main__':
 
     parser.add_argument('-a','--address', required='True', help='IP address')
     parser.add_argument('-p', '--port', required='True', help='Port of SipServer')
-    parser.add_argument('-i', '--interface', required='True', help='Network interface')
-    parser.add_argument('-s', '--sipserver', help='Path to SipServer')
+    parser.add_argument('-s', '--sipserver', required='True', help='Path to SipServer')
+    parser.add_argument('-i', '--interface', help='Network interface')
     parser.add_argument('-l', '--loglevel', help='Logger level')
     args = parser.parse_args()
 
