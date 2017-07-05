@@ -46,8 +46,9 @@ void SipServer::updateSocket(asio::ip::udp::endpoint endPoint) {
     }
     catch (asio::system_error & e) {
         //TODO: Handling incorrect network
-        std::cerr << e.what() << std::endl;
-        std::cerr << "Port is unavailable" << std::endl;
+        std::string what = e.what();
+        std::cerr << what << std::endl;
+        //std::cerr << "Port is unavailable" << std::endl;
 
         if (port < 1024) {
             std::cerr << "Port must be > 1024 on Unix, port is" << port << std::endl;
