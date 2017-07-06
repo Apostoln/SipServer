@@ -5,6 +5,11 @@
 
 #include <SipServer.hpp>
 
+SipServer::SipServer():
+    serverIo(new asio::io_service()),
+    networkInterface(asio::ip::address()),
+    port(0)
+{}
 
 SipServer::SipServer(asio::io_service* ioService, asio::ip::address networkInterface, unsigned short port) {
     // Server port is 0 on default if other value is not specified on constructor arguments.
@@ -26,6 +31,9 @@ SipServer::SipServer(asio::io_service* ioService, asio::ip::address networkInter
     }
 }
 
+SipServer::SipServer(const SipServer& sipServer):
+    SipServer(sipServer.serverIo, sipServer.networkInterface, sipServer.port) {}
+
 SipServer::~SipServer() {
     delete(serverSocket);
     delete(serverIo);
@@ -35,7 +43,7 @@ unsigned short SipServer::getPort() {
     return port;
 }
 
-void SipServer::setPort(unsigned short port) {
+void SipServer::changePort(unsigned short port) {
     this->port=port;
     this->updateSocket(asio::ip::udp::endpoint(asio::ip::udp::v4(), port));
 }
@@ -100,6 +108,18 @@ void SipServer::removeClient(asio::ip::udp::endpoint& client) {
     }
 }
 
+void SipServer::setPort(unsigned short port) {
+    this->port = port;
+
+}
+
+void SipServer::setServerIo(asio::io_service* serverIo) {
+    this->serverIo = serverIo;
+}
+
+void SipServer::setNetworkInterface(asio::ip::address networkInterface) {
+    this->networkInterface = networkInterface;
+}
 
 
 

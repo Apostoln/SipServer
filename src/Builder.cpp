@@ -4,31 +4,32 @@
 
 using Builder = SipServer::Builder;
 
-Builder::Builder() {}
+Builder::Builder():
+    sipServer(new SipServer())
+{}
 
-Builder Builder::setIoService(asio::io_service* serverIo) {
-    this->serverIo = serverIo;
+Builder Builder::ioService(asio::io_service* serverIo) {
+    this->sipServer->setServerIo(serverIo);
     return *this;
 }
 
-Builder Builder::setPort(unsigned short port) {
-    this->port = port;
+Builder Builder::port(unsigned short port) {
+    this->sipServer->setPort(port);
     return *this;
 }
 
-Builder Builder::setNetworkInterface(asio::ip::address networkInterface) {
-    this->networkInterface = networkInterface;
+Builder Builder::networkInterface(asio::ip::address networkInterface) {
+    this->sipServer->setNetworkInterface(networkInterface);
     return *this;
 }
 
-Builder Builder::setNetworkInterface(char *string) {
-    this->networkInterface = asio::ip::address::from_string(string);
+Builder Builder::networkInterface(char *string) {
+    this->sipServer->setNetworkInterface(asio::ip::address::from_string(string));
     return *this;
 }
 
 SipServer Builder::build() {
-    //TODO: Network inerface
-    return SipServer(serverIo, networkInterface, port);
+    return SipServer(*(this->sipServer));
 }
 
 

@@ -6,18 +6,17 @@
 
 class SipServer::Builder {
     private:
-        asio::io_service* serverIo = new asio::io_service;
-        asio::ip::address networkInterface = asio::ip::address();
-        unsigned short port = 0;
+        SipServer* sipServer;
 
     public:
         Builder();
-        Builder setIoService(asio::io_service* serverIo);
-        Builder setPort(unsigned short port);
-        Builder setNetworkInterface(asio::ip::address networkInterface);
-        Builder setNetworkInterface(char* string);
+        Builder ioService(asio::io_service* serverIo);
+        Builder port(unsigned short port);
+        Builder networkInterface(asio::ip::address networkInterface);
+        Builder networkInterface(char* string);
         SipServer build();
 };
+
 
 
 #endif //SIPSERVER_BUILDER_HPP
