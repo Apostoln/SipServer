@@ -17,7 +17,14 @@ SipServer::SipServer(asio::io_service* ioService, asio::ip::address networkInter
     this->serverIo = ioService;
     this->networkInterface = networkInterface;
     this->port = port;
+}
 
+SipServer::~SipServer() {
+    delete(serverSocket);
+    delete(serverIo);
+}
+
+void SipServer::init() {
     if (networkInterface.is_unspecified()) {
         this->updateSocket(asio::ip::udp::endpoint(asio::ip::udp::v4(), port));
     }
@@ -29,14 +36,6 @@ SipServer::SipServer(asio::io_service* ioService, asio::ip::address networkInter
     if(port == 0) {
         this->port = serverSocket->local_endpoint().port();
     }
-}
-
-SipServer::SipServer(const SipServer& sipServer):
-    SipServer(sipServer.serverIo, sipServer.networkInterface, sipServer.port) {}
-
-SipServer::~SipServer() {
-    delete(serverSocket);
-    delete(serverIo);
 }
 
 unsigned short SipServer::getPort() {

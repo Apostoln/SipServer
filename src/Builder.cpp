@@ -29,7 +29,8 @@ Builder Builder::networkInterface(char *string) {
 }
 
 SipServer Builder::build() {
-    return SipServer(*(this->sipServer));
+    sipServer->init();
+    return *sipServer;
 }
 
 

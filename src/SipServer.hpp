@@ -20,8 +20,8 @@ class SipServer {
 
         SipServer();
         SipServer(asio::io_service* ioService, asio::ip::address networkInterface, unsigned short port);
-        SipServer(const SipServer& sipServer);
         ~SipServer();
+        void init();
         unsigned short getPort();
         void changePort(unsigned short port);
         void updateSocket(asio::ip::udp::endpoint endPoint);
