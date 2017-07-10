@@ -36,10 +36,6 @@ void SipServer::init() {
     }
 }
 
-unsigned short SipServer::getPort() {
-    return port;
-}
-
 void SipServer::changePort(unsigned short port) {
     this->port=port;
     this->updateSocket(asio::ip::udp::endpoint(asio::ip::udp::v4(), port));
@@ -108,7 +104,6 @@ void SipServer::removeClient(asio::ip::udp::endpoint& client) {
 void SipServer::setPort(unsigned short port) {
     this->port = port;
     //TODO: updateSocket()
-
 }
 
 void SipServer::setServerIo(asio::io_service* serverIo) {
@@ -121,5 +116,14 @@ void SipServer::setNetworkInterface(asio::ip::address networkInterface) {
     //TODO: updateSocket()
 }
 
+unsigned short SipServer::getPort() {
+    return port;
+}
 
+asio::ip::address SipServer::getNetworkInterface() {
+    return networkInterface;
+}
 
+std::vector<asio::ip::udp::endpoint> SipServer::getClients() {
+    return clients;
+}

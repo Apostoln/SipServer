@@ -22,7 +22,7 @@ class SipServer {
         SipServer(asio::io_service* ioService, asio::ip::address networkInterface, unsigned short port);
         ~SipServer();
         void init();
-        unsigned short getPort();
+
         void changePort(unsigned short port);
         void updateSocket(asio::ip::udp::endpoint endPoint);
         void run();
@@ -31,6 +31,10 @@ class SipServer {
         void setPort(unsigned short port);
         void setServerIo(asio::io_service* serverIo);
         void setNetworkInterface(asio::ip::address networkInterface);
+
+        unsigned short getPort();
+        asio::ip::address getNetworkInterface();
+        std::vector<asio::ip::udp::endpoint> getClients();
 };
 
 #endif //SIPSERVER_SIPSERVER_HPP
