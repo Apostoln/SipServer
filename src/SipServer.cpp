@@ -11,13 +11,11 @@ SipServer::SipServer():
     port(0)
 {}
 
-SipServer::SipServer(asio::io_service* ioService, asio::ip::address networkInterface, unsigned short port) {
-    // Server port is 0 on default if other value is not specified on constructor arguments.
-    // If server port value is 0, system set for new socket any free and allowed udp port.
-    this->serverIo = ioService;
-    this->networkInterface = networkInterface;
-    this->port = port;
-}
+SipServer::SipServer(asio::io_service* ioService, asio::ip::address networkInterface, unsigned short port):
+    serverIo(ioService),
+    networkInterface(networkInterface),
+    port(port)
+{}
 
 SipServer::~SipServer() {
     delete(serverSocket);
