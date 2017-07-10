@@ -107,15 +107,18 @@ void SipServer::removeClient(asio::ip::udp::endpoint& client) {
 
 void SipServer::setPort(unsigned short port) {
     this->port = port;
+    //TODO: updateSocket()
 
 }
 
 void SipServer::setServerIo(asio::io_service* serverIo) {
     this->serverIo = serverIo;
+    //TODO: updateSocket()
 }
 
 void SipServer::setNetworkInterface(asio::ip::address networkInterface) {
     this->networkInterface = networkInterface;
+    //TODO: updateSocket()
 }
 
 

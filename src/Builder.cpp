@@ -9,22 +9,23 @@ Builder::Builder():
 {}
 
 Builder Builder::ioService(asio::io_service* serverIo) {
-    this->sipServer->setServerIo(serverIo);
+    //this->sipServer->setServerIo(serverIo);
+    sipServer->serverIo = serverIo;
     return *this;
 }
 
 Builder Builder::port(unsigned short port) {
-    this->sipServer->setPort(port);
+    sipServer->port = port;
     return *this;
 }
 
 Builder Builder::networkInterface(asio::ip::address networkInterface) {
-    this->sipServer->setNetworkInterface(networkInterface);
+    sipServer->networkInterface = networkInterface;
     return *this;
 }
 
 Builder Builder::networkInterface(char *string) {
-    this->sipServer->setNetworkInterface(asio::ip::address::from_string(string));
+    sipServer->networkInterface = asio::ip::address::from_string(string);
     return *this;
 }
 
