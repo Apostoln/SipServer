@@ -15,6 +15,10 @@ class SipServer {
         asio::ip::address networkInterface;
         std::vector<asio::ip::udp::endpoint> clients;
 
+        void setPort(unsigned short port);
+        void setServerIo(asio::io_service* serverIo);
+        void setNetworkInterface(asio::ip::address networkInterface);
+
     public:
         class Builder;
 
@@ -28,9 +32,7 @@ class SipServer {
         void run();
         void removeClient(asio::ip::udp::endpoint& client);
 
-        void setPort(unsigned short port);
-        void setServerIo(asio::io_service* serverIo);
-        void setNetworkInterface(asio::ip::address networkInterface);
+
 
         unsigned short getPort();
         asio::ip::address getNetworkInterface();
