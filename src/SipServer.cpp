@@ -32,9 +32,20 @@ void SipServer::init() {
 }
 
 void SipServer::changePort(unsigned short port) {
-    this->port=port;
+    setPort(port);
     this->updateSocket();
 }
+
+void SipServer::changeServerIo(asio::io_service* serverIo) {
+    setServerIo(serverIo);
+    this->updateSocket();
+}
+
+void SipServer::changeNetworkInterface(asio::ip::address networkInterface) {
+    setNetworkInterface(networkInterface);
+    this->updateSocket();
+}
+
 
 void SipServer::updateSocket() {
     try {

@@ -26,12 +26,13 @@ class SipServer {
         SipServer(asio::io_service* ioService, asio::ip::address networkInterface, unsigned short port);
         ~SipServer();
         void init();
-
-        void changePort(unsigned short port);
         void updateSocket();
         void run();
         void removeClient(asio::ip::udp::endpoint& client);
 
+        void changePort(unsigned short port);
+        void changeServerIo(asio::io_service* serverIo);
+        void changeNetworkInterface(asio::ip::address networkInterface);
 
 
         unsigned short getPort();
