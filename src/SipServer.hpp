@@ -24,7 +24,7 @@ class SipServer {
         void init();
 
         void changePort(unsigned short port);
-        void updateSocket(asio::ip::udp::endpoint endPoint);
+        void updateSocket();
         void run();
         void removeClient(asio::ip::udp::endpoint& client);
 

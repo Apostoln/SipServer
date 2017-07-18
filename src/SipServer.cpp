@@ -23,12 +23,7 @@ SipServer::~SipServer() {
 }
 
 void SipServer::init() {
-    if (networkInterface.is_unspecified()) {
-        this->updateSocket(asio::ip::udp::endpoint(asio::ip::udp::v4(), port));
-    }
-    else {
-        this->updateSocket(asio::ip::udp::endpoint(networkInterface, port));
-    }
+    updateSocket();
 
     // If port is not specified by user, we should find a port number that actually assigned to socket;
     if(port == 0) {
@@ -38,11 +33,19 @@ void SipServer::init() {
 
 void SipServer::changePort(unsigned short port) {
     this->port=port;
-    this->updateSocket(asio::ip::udp::endpoint(asio::ip::udp::v4(), port));
+    this->updateSocket();
 }
 
-void SipServer::updateSocket(asio::ip::udp::endpoint endPoint) {
+void SipServer::updateSocket() {
     try {
+        asio::ip::udp::endpoint endPoint;
+        if (networkInterface.is_unspecified()) {
+            endPoint = asio::ip::udp::endpoint(asio::ip::udp::v4(), port);
+        }
+        else {
+            endPoint = asio::ip::udp::endpoint(networkInterface, port);
+        }
+
         this->serverSocket = new asio::ip::udp::socket(*serverIo, endPoint);
     }
     catch (asio::system_error & e) {
