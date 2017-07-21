@@ -9,10 +9,10 @@ import argparse
 
 def test(testFunction):
     resultTest = testFunction()
-    print("\n{0} is {1}passed\n".format(testFunction.__name__,'' if resultTest else 'not '))
+    print("\n{0} is {1}passed\n".format(testFunction.__name__,'' if resultTest else 'NOT '))
     return resultTest
 
-def testPortListening():
+def portListening():
     if DEBUG:
         print(sys._getframe().f_code.co_name)
     command = [path, '-p', port]
@@ -33,7 +33,7 @@ def testPortListening():
         return True
     return False
 
-def testPortListeningMultiConnection():
+def portListeningMultiConnection():
     if DEBUG:
         print(sys._getframe().f_code.co_name)
     command = [path, '-p', port]
@@ -55,7 +55,7 @@ def testPortListeningMultiConnection():
         return True
     return False
 
-def testPortListeningUsedPort():
+def portListeningUsedPort():
     if DEBUG:
         print(sys._getframe().f_code.co_name)
     usedSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -74,7 +74,7 @@ def testPortListeningUsedPort():
         clientSocket.sendto(m.encode(), serverEndPoint)
     return result.returncode != 0
 
-def testPortListeningUnavailablePort():
+def portListeningUnavailablePort():
     if DEBUG:
         print(sys._getframe().f_code.co_name)
     osType = platform.system()
@@ -88,7 +88,7 @@ def testPortListeningUnavailablePort():
     time.sleep(0.1)
     return result.returncode != 0
 
-def testPortListeningSpecificInterface():
+def portListeningSpecificInterface():
     if DEBUG:
         print(sys._getframe().f_code.co_name)
     networkInterface ='192.168.64.100'
@@ -117,7 +117,7 @@ def testPortListeningSpecificInterface():
 
     return all(any(r.find(m) != -1 for r in stdoutResult) for m in messages)
 
-def testPortListeningSpecificInterfaceUnavailable():
+def portListeningSpecificInterfaceUnavailable():
     if DEBUG:
         print(sys._getframe().f_code.co_name)
     command = [path, '-p', '0', '-n', '1.2.3.4']
@@ -126,7 +126,7 @@ def testPortListeningSpecificInterfaceUnavailable():
     return result.returncode != 0
 
 
-def testEcho():
+def echoServer():
     if DEBUG:
         print(sys._getframe().f_code.co_name)
     command = [path, '-p', port]
@@ -146,7 +146,7 @@ def testEcho():
             print('> ', d)
     return data == messages
 
-def testEchoMultiConnection():
+def echoMultiConnection():
     if DEBUG:
         print(sys._getframe().f_code.co_name)
     command = [path, '-p', port]
@@ -185,11 +185,11 @@ if __name__ == '__main__':
 
     serverEndPoint = (address, int(port))
     print(address, port, path)
-    test(testPortListening)
-    test(testPortListeningMultiConnection)
-    test(testPortListeningUnavailablePort)
-    test(testPortListeningUsedPort)
-    test(testPortListeningSpecificInterface)
-    test(testPortListeningSpecificInterfaceUnavailable)
-    test(testEcho)
-    test(testEchoMultiConnection)
+    test(portListening)
+    test(portListeningMultiConnection)
+    test(portListeningUnavailablePort)
+    test(portListeningUsedPort)
+    test(portListeningSpecificInterface)
+    test(portListeningSpecificInterfaceUnavailable)
+    test(echoServer)
+    test(echoMultiConnection)
