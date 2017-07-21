@@ -15,7 +15,7 @@ def test(testFunction):
 def testPortListening():
     if DEBUG:
         print(sys._getframe().f_code.co_name)
-    command = [path, port]
+    command = [path, '-p', port]
     result = subprocess.Popen(command, stdout=subprocess.PIPE)
     clientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     time.sleep(0.1)
@@ -36,7 +36,7 @@ def testPortListening():
 def testPortListeningMultiConnection():
     if DEBUG:
         print(sys._getframe().f_code.co_name)
-    command = [path, port]
+    command = [path, '-p', port]
     result = subprocess.Popen(command, stdout=subprocess.PIPE)
     time.sleep(0.1)
     messages = ['Hello', 'World', 'q']
@@ -62,7 +62,7 @@ def testPortListeningUsedPort():
     usedSocket.sendto("q".encode(), serverEndPoint)
     usedPort = usedSocket.getsockname()[-1]
 
-    command = [path, str(usedPort)]
+    command = [path, '-p', str(usedPort)]
     result = subprocess.Popen(command, stdout=subprocess.PIPE)
     clientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     time.sleep(0.1)
@@ -82,7 +82,7 @@ def testPortListeningUnavailablePort():
         print("OS is", osType)
     if osType != 'Linux':
         return True
-    command = [path, '54']
+    command = [path, '-p', '54']
     result = subprocess.Popen(command, stdout=subprocess.PIPE)
     clientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     time.sleep(0.1)
@@ -94,7 +94,7 @@ def testPortListeningSpecificInterface():
     networkInterface ='192.168.64.100'
     endPoint = (networkInterface, serverEndPoint[1])
     print(endPoint)
-    command = [path, port, networkInterface]
+    command = [path, '-p', port, '-n', networkInterface]
 
     result = subprocess.Popen(command, stdout=subprocess.PIPE)
     clientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -120,7 +120,7 @@ def testPortListeningSpecificInterface():
 def testPortListeningSpecificInterfaceUnavailable():
     if DEBUG:
         print(sys._getframe().f_code.co_name)
-    command = [path, '0', '1.2.3.4']
+    command = [path, '-p', '0', '-n', '1.2.3.4']
     result = subprocess.Popen(command, stdout=subprocess.PIPE)
     time.sleep(0.1)
     return result.returncode != 0
@@ -129,7 +129,7 @@ def testPortListeningSpecificInterfaceUnavailable():
 def testEcho():
     if DEBUG:
         print(sys._getframe().f_code.co_name)
-    command = [path, port]
+    command = [path, '-p', port]
     result = subprocess.Popen(command, stdout=subprocess.PIPE)
     clientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     time.sleep(0.1)
@@ -149,7 +149,7 @@ def testEcho():
 def testEchoMultiConnection():
     if DEBUG:
         print(sys._getframe().f_code.co_name)
-    command = [path, port]
+    command = [path, '-p', port]
     result = subprocess.Popen(command, stdout=subprocess.PIPE)
     time.sleep(0.1)
     messages = ['Hello', 'World', 'q']
