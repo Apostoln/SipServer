@@ -13,7 +13,7 @@ class SipServer::Builder {
         Builder ioService(asio::io_service* serverIo);
         Builder port(unsigned short port);
         Builder networkInterface(asio::ip::address networkInterface);
-        Builder networkInterface(char* string);
+        Builder networkInterface(const char* string);
         SipServer build();
 };
 

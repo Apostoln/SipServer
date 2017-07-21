@@ -2,17 +2,24 @@
 #include <Builder.hpp>
 #include <argparse.hpp>
 
-int main(int argc, char* argv[]) {
-    //TODO: Args parsing
+using uint = unsigned int;
+
+int main(int argc, const char* argv[]) {
+    ArgumentParser parser;
+    parser.addArgument("-p", "--port", 1);
+    parser.addArgument("-n", "--networkInterface", 1);
+    parser.parse(argc, argv);
+
+    auto portArg = parser.retrieve<std::string>("port");
+    auto networkInterfaceArg = parser.retrieve<std::string>("networkInterface");
 
     SipServer::Builder sipServerBuilder;
-    if (argc >= 2) {
-        // Create with specified port from main function arguments.
-        auto port = (unsigned short) std::atoi(argv[1]);
+    if (!portArg.empty()) {
+        auto port = (uint) std::stoi(portArg);
         sipServerBuilder.port(port);
     }
-    if (argc >= 3) {
-        auto networkInterface = argv[2];
+    if (!networkInterfaceArg.empty()) {
+        auto networkInterface = networkInterfaceArg.c_str();
         sipServerBuilder.networkInterface(networkInterface);
     }
 

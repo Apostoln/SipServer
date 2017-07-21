@@ -24,7 +24,7 @@ Builder Builder::networkInterface(asio::ip::address networkInterface) {
     return *this;
 }
 
-Builder Builder::networkInterface(char *string) {
+Builder Builder::networkInterface(const char *string) {
     sipServer->networkInterface = asio::ip::address::from_string(string);
     return *this;
 }
