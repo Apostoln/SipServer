@@ -180,12 +180,18 @@ if __name__ == '__main__':
     print(address, port, path)
 
     testMessages = ['Hello', 'World', 'q']
-        
-    test(portListening)
-    test(portListeningMultiConnection)
-    test(portListeningUnavailablePort)
-    test(portListeningUsedPort)
-    test(portListeningSpecificInterface)
-    test(portListeningSpecificInterfaceUnavailable)
-    test(echoServer)
-    test(echoMultiConnection)
+
+    tests = [portListening,
+             portListeningMultiConnection,
+             portListeningUnavailablePort,
+             portListeningUsedPort,
+             portListeningSpecificInterface,
+             portListeningSpecificInterfaceUnavailable]
+
+    results = [test(name) for name in tests]
+    if all(results):
+        print('\nAll tests are passed')
+    elif any(results):
+        print('\nSome tests failed')
+    else:
+        print("\nAll tests are failed")
