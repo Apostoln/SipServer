@@ -6,9 +6,46 @@ import subprocess
 import time
 import platform
 import argparse
+import functools
+import signal
 
 LOCALHOST = '127.0.0.1'
 testMessages = ['Hello', 'World', 'q']
+
+class TimeoutError(Exception):
+    def __init__(self, value='Time out'):
+        self.value = value
+    def __str__(self):
+        return self.value
+
+def timeout(seconds):
+    def decorate(func):
+        def handler(signum, frame):
+            raise TimeoutError()
+
+        @functools.wraps(func)
+        def wrapped(*args, **kwargs):
+            old = signal.signal(signal.SIGALRM, handler)
+            signal.alarm(seconds)
+            try:
+                result = func(*args, **kwargs)
+            except TimeoutError:
+                result = False
+                if DEBUG:
+                    print("Time out error")
+            finally:
+                signal.signal(signal.SIGALRM, old)
+            return result
+        return wrapped
+    return decorate
+
+def printName(fn):
+    @functools.wraps(fn)
+    def wrapped():
+        if DEBUG:
+            print(fn.__name__)
+        return fn()
+    return wrapped
 
 def freePort():
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
@@ -33,14 +70,12 @@ def process(command, multiConnection = False):
     return tuple(result)
 
 def test(testFunction):
-    name = testFunction.__name__
-    if DEBUG:
-        print(name)
-
     resultTest = testFunction()
-    print("\n{0} is {1}passed".format(name,'' if resultTest else 'NOT '))
+    print("\n{0} is {1}passed".format(testFunction.__name__,'' if resultTest else 'NOT '))
     return resultTest
 
+@printName
+@timeout(5)
 def portListening():
     result, clientSocket = process([path, '-p', port])
     if DEBUG:
@@ -54,6 +89,8 @@ def portListening():
             print('> ', r[:-1])
     return all(any(r.find(m) != -1 for r in stdoutResult) for m in testMessages)
 
+@printName
+@timeout(5)
 def portListeningMultiConnection():
     result, sockets = process([path, '-p', port], True)
     for m in testMessages:
@@ -67,6 +104,8 @@ def portListeningMultiConnection():
             print('> ', r[:-1])
     return all(all(any(r.find(m) != -1 for r in stdoutResult) for m in testMessages) for s in sockets)
 
+@printName
+@timeout(5)
 def portListeningUsedPort():
     usedSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     usedSocket.sendto("q".encode(), serverEndPoint)
@@ -80,6 +119,8 @@ def portListeningUsedPort():
         clientSocket.sendto(m.encode(), serverEndPoint)
     return result.returncode != 0
 
+@printName
+@timeout(5)
 def portListeningUnavailablePort():
     osType = platform.system()
     if DEBUG:
@@ -90,6 +131,8 @@ def portListeningUnavailablePort():
     result, _ = process([path, '-p', '54'])
     return result.returncode != 0
 
+@printName
+@timeout(5)
 def portListeningSpecificInterface():
     networkInterface = interface
     endPoint = (networkInterface, serverEndPoint[1])
@@ -109,10 +152,14 @@ def portListeningSpecificInterface():
 
     return all(any(r.find(m) != -1 for r in stdoutResult) for m in testMessages)
 
+@printName
+@timeout(5)
 def portListeningSpecificInterfaceUnavailable():
     result, _ = process([path, '-p', '0', '-n', '1.2.3.4'])
     return result.returncode != 0
 
+@printName
+@timeout(5)
 def echoServer():
     _, clientSocket = process([path, '-p', port])
     
@@ -128,6 +175,8 @@ def echoServer():
             print('> ', d)
     return data == testMessages
 
+@printName
+@timeout(5)
 def echoMultiConnection():
     _, sockets = process([path, '-p', port], True)
 
@@ -149,7 +198,9 @@ def main():
              portListeningUnavailablePort,
              portListeningUsedPort,
              portListeningSpecificInterface,
-             portListeningSpecificInterfaceUnavailable]
+             portListeningSpecificInterfaceUnavailable,
+             echoServer,
+             echoMultiConnection]
 
     results = [test(name) for name in tests]
     if all(results):
