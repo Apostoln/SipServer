@@ -8,6 +8,7 @@ import platform
 import argparse
 
 LOCALHOST = '127.0.0.1'
+testMessages = ['Hello', 'World', 'q']
 
 def freePort():
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -33,13 +34,15 @@ def process(command, multiConnection = False):
     return tuple(result)
 
 def test(testFunction):
+    name = testFunction.__name__
+    if DEBUG:
+        print(name)
+
     resultTest = testFunction()
-    print("\n{0} is {1}passed".format(testFunction.__name__,'' if resultTest else 'NOT '))
+    print("\n{0} is {1}passed".format(name,'' if resultTest else 'NOT '))
     return resultTest
 
 def portListening():
-    if DEBUG:
-        print(sys._getframe().f_code.co_name)
     result, clientSocket = process([path, '-p', port])
     if DEBUG:
         for m in testMessages:
@@ -53,10 +56,7 @@ def portListening():
     return all(any(r.find(m) != -1 for r in stdoutResult) for m in testMessages)
 
 def portListeningMultiConnection():
-    if DEBUG:
-        print(sys._getframe().f_code.co_name)
     result, sockets = process([path, '-p', port], True)
-
     for m in testMessages:
         for sock in sockets:
             if DEBUG:
@@ -69,8 +69,6 @@ def portListeningMultiConnection():
     return all(all(any(r.find(m) != -1 for r in stdoutResult) for m in testMessages) for s in sockets)
 
 def portListeningUsedPort():
-    if DEBUG:
-        print(sys._getframe().f_code.co_name)
     usedSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     usedSocket.sendto("q".encode(), serverEndPoint)
     usedPort = usedSocket.getsockname()[-1]
@@ -84,8 +82,6 @@ def portListeningUsedPort():
     return result.returncode != 0
 
 def portListeningUnavailablePort():
-    if DEBUG:
-        print(sys._getframe().f_code.co_name)
     osType = platform.system()
     if DEBUG:
         print("OS is", osType)
@@ -96,17 +92,13 @@ def portListeningUnavailablePort():
     return result.returncode != 0
 
 def portListeningSpecificInterface():
-    if DEBUG:
-        print(sys._getframe().f_code.co_name)
     networkInterface = interface
     endPoint = (networkInterface, serverEndPoint[1])
 
     result, clientSocket = process([path, '-p', port, '-n', networkInterface])
-
     if DEBUG:
         for m in testMessages:
             print('< ', m)
-
     for m in testMessages:
         clientSocket.sendto(m.encode(), endPoint)
 
@@ -119,16 +111,10 @@ def portListeningSpecificInterface():
     return all(any(r.find(m) != -1 for r in stdoutResult) for m in testMessages)
 
 def portListeningSpecificInterfaceUnavailable():
-    if DEBUG:
-        print(sys._getframe().f_code.co_name)
     result, _ = process([path, '-p', '0', '-n', '1.2.3.4'])
-
     return result.returncode != 0
 
-
 def echoServer():
-    if DEBUG:
-        print(sys._getframe().f_code.co_name)
     _, clientSocket = process([path, '-p', port])
     
     if DEBUG:
@@ -144,8 +130,6 @@ def echoServer():
     return data == testMessages
 
 def echoMultiConnection():
-    if DEBUG:
-        print(sys._getframe().f_code.co_name)
     _, sockets = process([path, '-p', port], True)
 
     for m in testMessages:
@@ -159,6 +143,22 @@ def echoMultiConnection():
         print("Data is", data)
     return all(d == testMessages for d in data)
 
+
+def main():
+    tests = [portListening,
+             portListeningMultiConnection,
+             portListeningUnavailablePort,
+             portListeningUsedPort,
+             portListeningSpecificInterface,
+             portListeningSpecificInterfaceUnavailable]
+
+    results = [test(name) for name in tests]
+    if all(results):
+        print('\nAll tests are passed')
+    elif any(results):
+        print('\nSome tests failed')
+    else:
+        print("\nAll tests are failed")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -175,23 +175,6 @@ if __name__ == '__main__':
     path = args.sipserver
     interface = args.interface if args.interface else LOCALHOST
     DEBUG = True if args.loglevel else False
-
     serverEndPoint = (address, int(port))
-    print(address, port, path)
 
-    testMessages = ['Hello', 'World', 'q']
-
-    tests = [portListening,
-             portListeningMultiConnection,
-             portListeningUnavailablePort,
-             portListeningUsedPort,
-             portListeningSpecificInterface,
-             portListeningSpecificInterfaceUnavailable]
-
-    results = [test(name) for name in tests]
-    if all(results):
-        print('\nAll tests are passed')
-    elif any(results):
-        print('\nSome tests failed')
-    else:
-        print("\nAll tests are failed")
+    main()
