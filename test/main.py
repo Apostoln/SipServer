@@ -7,6 +7,15 @@ import time
 import platform
 import argparse
 
+LOCALHOST = '127.0.0.1'
+
+def freePort():
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.bind(('', 0))
+    _, port = sock.getsockname()
+    sock.close()
+    return port
+
 def process(command, multiConnection = False):
     result = []
     commandResult = subprocess.Popen(command, stdout=subprocess.PIPE)
@@ -25,7 +34,7 @@ def process(command, multiConnection = False):
 
 def test(testFunction):
     resultTest = testFunction()
-    print("\n{0} is {1}passed\n".format(testFunction.__name__,'' if resultTest else 'NOT '))
+    print("\n{0} is {1}passed".format(testFunction.__name__,'' if resultTest else 'NOT '))
     return resultTest
 
 def portListening():
@@ -89,9 +98,8 @@ def portListeningUnavailablePort():
 def portListeningSpecificInterface():
     if DEBUG:
         print(sys._getframe().f_code.co_name)
-    networkInterface ='192.168.64.100'
+    networkInterface = interface
     endPoint = (networkInterface, serverEndPoint[1])
-    print(endPoint)
 
     result, clientSocket = process([path, '-p', port, '-n', networkInterface])
 
@@ -155,17 +163,17 @@ def echoMultiConnection():
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('-a','--address', required='True', help='IP address')
-    parser.add_argument('-p', '--port', required='True', help='Port of SipServer')
     parser.add_argument('-s', '--sipserver', required='True', help='Path to SipServer')
+    parser.add_argument('-a', '--address', default=LOCALHOST, help='IP address of SipServer')
+    parser.add_argument('-p', '--port', help='Port of SipServer')
     parser.add_argument('-i', '--interface', help='Network interface')
     parser.add_argument('-l', '--loglevel', help='Logger level')
     args = parser.parse_args()
 
     address = args.address
-    port = args.port
+    port = str(args.port if args.port else freePort())
     path = args.sipserver
-    interface = args.interface
+    interface = args.interface if args.interface else LOCALHOST
     DEBUG = True if args.loglevel else False
 
     serverEndPoint = (address, int(port))
