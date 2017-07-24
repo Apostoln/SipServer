@@ -11,10 +11,9 @@ LOCALHOST = '127.0.0.1'
 testMessages = ['Hello', 'World', 'q']
 
 def freePort():
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.bind(('', 0))
-    _, port = sock.getsockname()
-    sock.close()
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+        sock.bind(('', 0))
+        _, port = sock.getsockname()
     return port
 
 def process(command, multiConnection = False):
