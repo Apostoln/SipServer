@@ -8,6 +8,7 @@ import argparse
 import functools
 import signal
 
+TIMEOUT_LIMIT = 5
 LOCALHOST = '127.0.0.1'
 testMessages = ['Hello', 'World', 'q']
 
@@ -20,7 +21,7 @@ class TimeoutError(Exception):
 def timeout(seconds):
     def decorate(func):
         def handler(signum, frame):
-            raise TimeoutError()
+            raise TimeoutError('Timeout limit in {0} seconds is exceeded'.format(seconds))
 
         @functools.wraps(func)
         def wrapped(*args, **kwargs):
@@ -74,7 +75,7 @@ def test(testFunction):
     return resultTest
 
 @printName
-@timeout(5)
+@timeout(TIMEOUT_LIMIT)
 def portListening():
     result, clientSocket = process([path, '-p', port])
     if DEBUG:
@@ -89,7 +90,7 @@ def portListening():
     return all(any(r.find(m) != -1 for r in stdoutResult) for m in testMessages)
 
 @printName
-@timeout(5)
+@timeout(TIMEOUT_LIMIT)
 def portListeningMultiConnection():
     result, sockets = process([path, '-p', port], True)
     for m in testMessages:
@@ -104,7 +105,7 @@ def portListeningMultiConnection():
     return all(all(any(r.find(m) != -1 for r in stdoutResult) for m in testMessages) for s in sockets)
 
 @printName
-@timeout(5)
+@timeout(TIMEOUT_LIMIT)
 def portListeningUsedPort():
     usedSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     usedSocket.sendto("q".encode(), serverEndPoint)
@@ -131,7 +132,7 @@ def portListeningUnavailablePort():
     return result.returncode != 0
 
 @printName
-@timeout(5)
+@timeout(TIMEOUT_LIMIT)
 def portListeningSpecificInterface():
     networkInterface = interface
     endPoint = (networkInterface, serverEndPoint[1])
@@ -152,13 +153,13 @@ def portListeningSpecificInterface():
     return all(any(r.find(m) != -1 for r in stdoutResult) for m in testMessages)
 
 @printName
-@timeout(5)
+@timeout(TIMEOUT_LIMIT)
 def portListeningSpecificInterfaceUnavailable():
     result, _ = process([path, '-p', '0', '-n', '1.2.3.4'])
     return result.returncode != 0
 
 @printName
-@timeout(5)
+@timeout(TIMEOUT_LIMIT)
 def echoServer():
     _, clientSocket = process([path, '-p', port])
     
@@ -175,7 +176,7 @@ def echoServer():
     return data == testMessages
 
 @printName
-@timeout(5)
+@timeout(TIMEOUT_LIMIT)
 def echoMultiConnection():
     _, sockets = process([path, '-p', port], True)
 
