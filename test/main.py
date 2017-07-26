@@ -29,10 +29,10 @@ def timeout(seconds):
             signal.alarm(seconds)
             try:
                 result = func(*args, **kwargs)
-            except TimeoutError:
+            except TimeoutError as e:
                 result = False
-                if DEBUG:
-                    print("Time out error")
+                reason = str(e)
+                return result, reason
             finally:
                 signal.signal(signal.SIGALRM, old)
             return result
@@ -70,8 +70,10 @@ def process(command, multiConnection = False):
     return tuple(result)
 
 def test(testFunction):
-    resultTest = testFunction()
+    resultTest, reason = testFunction()
     print("\n{0} is {1}passed".format(testFunction.__name__,'' if resultTest else 'NOT '))
+    if not resultTest:
+        print('Reason:', reason);
     return resultTest
 
 @printName
@@ -87,7 +89,9 @@ def portListening():
     if DEBUG:
         for r in stdoutResult:
             print('> ', r[:-1])
-    return all(any(r.find(m) != -1 for r in stdoutResult) for m in testMessages)
+    isAllMessagesDelivered = all(any(r.find(m) != -1 for r in stdoutResult) for m in testMessages)
+    reason = 'All messages are not delivered' if isAllMessagesDelivered else None
+    return isAllMessagesDelivered, reason
 
 @printName
 @timeout(TIMEOUT_LIMIT)
@@ -102,7 +106,9 @@ def portListeningMultiConnection():
     if DEBUG:
         for r in stdoutResult:
             print('> ', r[:-1])
-    return all(all(any(r.find(m) != -1 for r in stdoutResult) for m in testMessages) for s in sockets)
+    isAllMessagesDelivered = all(all(any(r.find(m) != -1 for r in stdoutResult) for m in testMessages) for s in sockets), None
+    reason = 'All messages are not delivered' if isAllMessagesDelivered else None
+    return isAllMessagesDelivered, reason
 
 @printName
 @timeout(TIMEOUT_LIMIT)
@@ -117,7 +123,7 @@ def portListeningUsedPort():
             print('< ', m)
     for m in testMessages:
         clientSocket.sendto(m.encode(), serverEndPoint)
-    return result.returncode != 0
+    return result.returncode != 0, None
 
 @printName
 @timeout(5)
@@ -129,7 +135,7 @@ def portListeningUnavailablePort():
         return True
 
     result, _ = process([path, '-p', '54'])
-    return result.returncode != 0
+    return result.returncode != 0, None
 
 @printName
 @timeout(TIMEOUT_LIMIT)
@@ -150,13 +156,15 @@ def portListeningSpecificInterface():
         for r in stdoutResult:
             print('> ', r[:-1])
 
-    return all(any(r.find(m) != -1 for r in stdoutResult) for m in testMessages)
+    isAllMessagesDelivered = all(any(r.find(m) != -1 for r in stdoutResult) for m in testMessages), None
+    reason = 'All messages are not delivered' if isAllMessagesDelivered else None
+    return isAllMessagesDelivered, reason
 
 @printName
 @timeout(TIMEOUT_LIMIT)
 def portListeningSpecificInterfaceUnavailable():
     result, _ = process([path, '-p', '0', '-n', '1.2.3.4'])
-    return result.returncode != 0
+    return result.returncode != 0, None
 
 @printName
 @timeout(TIMEOUT_LIMIT)
@@ -173,7 +181,10 @@ def echoServer():
     if DEBUG:
         for d in data:
             print('> ', d)
-    return data == testMessages
+
+    isAllMessagesDelivered = data == testMessages
+    reason = 'All messages are not delivered' if isAllMessagesDelivered else None
+    return isAllMessagesDelivered, reason
 
 @printName
 @timeout(TIMEOUT_LIMIT)
@@ -189,8 +200,9 @@ def echoMultiConnection():
     data = [[sock.recv(len(m)).decode() for m in testMessages] for sock in sockets]
     if DEBUG:
         print("Data is", data)
-    return all(d == testMessages for d in data)
-
+    isAllMessagesDelivered = all(d == testMessages for d in data)
+    reason = 'All messages are not delivered' if isAllMessagesDelivered else None
+    return isAllMessagesDelivered, reason
 
 def main():
     tests = [portListening,
@@ -203,12 +215,16 @@ def main():
              echoMultiConnection]
 
     results = [test(name) for name in tests]
+    print(results)
+    passed = results.count(True)
+
     if all(results):
         print('\nAll tests are passed')
     elif any(results):
         print('\nSome tests failed')
     else:
         print("\nAll tests are failed")
+    print('{0}/{1}'.format(passed, len(tests)))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
