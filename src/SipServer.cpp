@@ -60,15 +60,23 @@ void SipServer::updateSocket() {
         this->serverSocket = new asio::ip::udp::socket(*serverIo, endPoint);
     }
     catch (asio::system_error & e) {
-        //TODO: Handling incorrect network
-        std::string what = e.what();
-        std::cerr << what << std::endl;
-        //std::cerr << "Port is unavailable" << std::endl;
-
-        if (port < 1024) {
-            std::cerr << "Port must be > 1024 on Unix, port is" << port << std::endl;
+        auto errorCode = e.code().value();
+        std::cerr << "Error code: "  << e.code() << std::endl;
+        std::cerr << "\"" << e.what() << "\"" << std::endl;
+        switch (errorCode) {
+            case 13:
+                std::cerr << "Port is unavailable" << std::endl;
+                if (port < 1024) {
+                    std::cerr << "Port must be > 1024 on Unix, port is " << port << std::endl;
+                }
+                break;
+            case 99:
+                std::cerr << "Network interface is not supported: " << networkInterface.to_string() << std::endl;
+                break;
+            default:
+                std::cerr << "Unknown asio error" << std::endl;
         }
-        exit(1);
+        exit(errorCode);
     }
 }
 
