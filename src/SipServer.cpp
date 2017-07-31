@@ -119,7 +119,7 @@ void SipServer::run() {
     LOG(INFO) << "Listening UDP port " << this->getPort();
 
     while(true) {
-        char buff[1024] = {0};
+        char buff[4096] = {0};
         //Amount of received bytes
         size_t bytesReceived = serverSocket->receive_from(asio::buffer(buff), clientEndPoint);
         LOG(INFO) << bytesReceived << " bytes received: ";

@@ -1,6 +1,3 @@
-//#define ELPP_NO_DEFAULT_LOG_FILE
-//#define ELPP_DEFAULT_LOG_FILE "log1/sipserver.log"
-
 #include <argparse.hpp>
 #include <easylogging++.h>
 
@@ -12,7 +9,6 @@
 INITIALIZE_EASYLOGGINGPP //crutch for logger
 
 using uint = unsigned int;
-
 el::Level defaultLogLevel = el::Level::Info;
 const std::string defaultLogFilePath = "log/sipserver.log";
 
@@ -25,7 +21,7 @@ int main(int argc, const char* argv[]) {
     parser.addArgument("-f", "--fileLogger", 1);
     parser.parse(argc, argv);
 
-    auto portArg = parser.retrieve<std::string>("port");
+    auto portArg = parser.retrieve<std::string>("porqt");
     auto networkInterfaceArg = parser.retrieve<std::string>("networkInterface");
     auto logLevel = getLogLevel(parser.retrieve<std::string>("logLevel"));
     logLevel = logLevel == el::Level::Unknown? defaultLogLevel : logLevel;
