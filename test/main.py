@@ -91,7 +91,7 @@ def portListening():
             print('> ', r[:-1])
 
     returncode = result.poll()
-    if returncode!= 0:
+    if returncode:
         reason = f'Return code: {returncode}'
         return False, reason
     isAllMessagesDelivered = all(any(r.find(m) != -1 for r in stdoutResult) for m in testMessages)
@@ -113,7 +113,7 @@ def portListeningMultiConnection():
             print('> ', r[:-1])
 
     returncode = result.poll()
-    if returncode!= 0:
+    if returncode:
         reason = f'Return code: {returncode}'
         return False, reason
     isAllMessagesDelivered = all(all(any(r.find(m) != -1 for r in stdoutResult) for m in testMessages) for s in sockets)
@@ -138,7 +138,7 @@ def portListeningUsedPort():
     return returncode != 0, None
 
 @printName
-@timeout(5)
+@timeout(TIMEOUT_LIMIT)
 def portListeningUnavailablePort():
     osType = platform.system()
     if DEBUG:
@@ -169,7 +169,7 @@ def portListeningSpecificInterface():
             print('> ', r[:-1])
 
     returncode = result.poll()
-    if returncode!= 0:
+    if returncode:
         reason = f'Return code: {returncode}'
         return False, reason
 
@@ -201,7 +201,7 @@ def echoServer():
             print('> ', d)
 
     returncode = result.poll()
-    if returncode!= 0:
+    if returncode:
         reason = f'Return code: {returncode}'
         return False, reason
 
@@ -225,7 +225,7 @@ def echoMultiConnection():
         print("Data is", data)
 
     returncode = result.poll()
-    if returncode!= 0:
+    if returncode:
         reason = f'Return code: {returncode}'
         return False, reason
 
