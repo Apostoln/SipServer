@@ -8,6 +8,3 @@ class Config:
     interface = None
     DEBUG = None
     serverEndPoint = None
-
-    def __init__(self):
-        pass
