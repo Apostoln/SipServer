@@ -1,5 +1,6 @@
 import functools
 import signal
+import sys
 
 from config import Config
 config = Config()
@@ -46,3 +47,11 @@ def printName(fn):
         return fn()
     return wrapped
 
+def printConsoleOut(result):
+    if DEBUG:
+        stdoutResult = [x.decode() for x in result.stdout]
+        stderrResult = [x.decode() for x in result.stderr]
+        for r in stdoutResult:
+            print('> ', r[:-1])
+        for e in stderrResult:
+            print(e, file=sys.stderr)

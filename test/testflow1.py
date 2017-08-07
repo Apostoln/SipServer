@@ -4,7 +4,7 @@ import time
 import platform
 
 from config import Config
-from utils import timeout, printName
+from utils import timeout, printName, printConsoleOut
 
 config = Config()
 
@@ -20,7 +20,7 @@ testMessages = ['Hello', 'World', 'q']
 
 def process(command, multiConnection=False):
     result = []
-    commandResult = subprocess.Popen(command, stdout=subprocess.PIPE)
+    commandResult = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     result.append(commandResult)
 
     if not multiConnection:
@@ -38,17 +38,16 @@ def process(command, multiConnection=False):
 @printName
 @timeout(TIMEOUT_LIMIT)
 def portListening():
-    print(path, port)
     result, clientSocket = process([path, '-p', port])
-    if DEBUG:
-        for m in testMessages:
-            print('< ', m)
+
     for m in testMessages:
+        if DEBUG:
+            print('< ', m)
         clientSocket.sendto(m.encode(), serverEndPoint)
+
+
     stdoutResult = [x.decode() for x in result.stdout]
-    if DEBUG:
-        for r in stdoutResult:
-            print('> ', r[:-1])
+    printConsoleOut(result)
 
     returncode = result.poll()
     if returncode:
@@ -68,15 +67,15 @@ def portListeningMultiConnection():
             if DEBUG:
                 print('< ', m)
             sock.sendto(m.encode(), serverEndPoint)
+
     stdoutResult = [x.decode() for x in result.stdout]
-    if DEBUG:
-        for r in stdoutResult:
-            print('> ', r[:-1])
+    printConsoleOut(result)
 
     returncode = result.poll()
     if returncode:
         reason = f'Return code: {returncode}'
         return False, reason
+
     isAllMessagesDelivered = all(all(any(r.find(m) != -1 for r in stdoutResult) for m in testMessages) for s in sockets)
     reason = 'All messages are not delivered' if isAllMessagesDelivered else None
     return isAllMessagesDelivered, reason
@@ -90,11 +89,12 @@ def portListeningUsedPort():
     usedPort = usedSocket.getsockname()[-1]
 
     result, clientSocket = process([path, '-p', str(usedPort)])
-    if DEBUG:
-        for m in testMessages:
-            print('< ', m)
     for m in testMessages:
+        if DEBUG:
+            print('< ', m)
         clientSocket.sendto(m.encode(), serverEndPoint)
+
+    printConsoleOut(result)
 
     returncode = result.poll()
     return returncode != 0, None
@@ -109,6 +109,8 @@ def portListeningUnavailablePort():
     if osType != 'Linux':
         return True
     result, _ = process([path, '-p', '54'])
+
+    printConsoleOut(result)
     returncode = result.poll()
     return returncode != 0, None
 
@@ -120,17 +122,14 @@ def portListeningSpecificInterface():
     endPoint = (networkInterface, serverEndPoint[1])
 
     result, clientSocket = process([path, '-p', port, '-n', networkInterface])
-    if DEBUG:
-        for m in testMessages:
-            print('< ', m)
+
     for m in testMessages:
+        if DEBUG:
+            print('< ', m)
         clientSocket.sendto(m.encode(), endPoint)
 
     stdoutResult = [x.decode() for x in result.stdout]
-
-    if DEBUG:
-        for r in stdoutResult:
-            print('> ', r[:-1])
+    printConsoleOut(result)
 
     returncode = result.poll()
     if returncode:
@@ -146,6 +145,9 @@ def portListeningSpecificInterface():
 @timeout(TIMEOUT_LIMIT)
 def portListeningSpecificInterfaceUnavailable():
     result, _ = process([path, '-p', '0', '-n', '1.2.3.4'])
+
+    printConsoleOut(result)
+
     returncode = result.poll()
     return returncode != 0, None
 
@@ -155,10 +157,9 @@ def portListeningSpecificInterfaceUnavailable():
 def echoServer():
     result, clientSocket = process([path, '-p', port])
 
-    if DEBUG:
-        for m in testMessages:
-            print('< ', m)
     for m in testMessages:
+        if DEBUG:
+            print('< ', m)
         clientSocket.sendto(m.encode(), serverEndPoint)
 
     data = [clientSocket.recv(len(m)).decode() for m in testMessages]
@@ -188,6 +189,7 @@ def echoMultiConnection():
             sock.sendto(m.encode(), serverEndPoint)
 
     data = [[sock.recv(len(m)).decode() for m in testMessages] for sock in sockets]
+
     if DEBUG:
         print("Data is", data)
 

@@ -9,7 +9,7 @@ LOCALHOST = '127.0.0.1'
 
 def test(testFunction):
     resultTest, reason = testFunction()
-    print("\n{0} is {1}passed".format(testFunction.__name__, '' if resultTest else 'NOT '))
+    print("{0} is {1}passed".format(testFunction.__name__, '' if resultTest else 'NOT '))
     if not resultTest:
         print('Reason:', reason)
     return resultTest
