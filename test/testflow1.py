@@ -16,7 +16,7 @@ DEBUG = config.DEBUG
 serverEndPoint = config.serverEndPoint
 
 TIMEOUT_LIMIT = 5
-testMessages = ['Hello', 'World', 'q']
+TEST_MESSAGES = ['Hello', 'World', 'q']
 
 def process(command, multiConnection=False):
     result = []
@@ -40,7 +40,7 @@ def process(command, multiConnection=False):
 def portListening():
     result, clientSocket = process([path, '-p', port])
 
-    for m in testMessages:
+    for m in TEST_MESSAGES:
         if DEBUG:
             print('< ', m)
         clientSocket.sendto(m.encode(), serverEndPoint)
@@ -53,7 +53,7 @@ def portListening():
     if returncode:
         reason = f'Return code: {returncode}'
         return False, reason
-    isAllMessagesDelivered = all(any(r.find(m) != -1 for r in stdoutResult) for m in testMessages)
+    isAllMessagesDelivered = all(any(r.find(m) != -1 for r in stdoutResult) for m in TEST_MESSAGES)
     reason = 'All messages are not delivered' if isAllMessagesDelivered else None
     return isAllMessagesDelivered, reason
 
@@ -62,7 +62,7 @@ def portListening():
 @timeout(TIMEOUT_LIMIT)
 def portListeningMultiConnection():
     result, sockets = process([path, '-p', port], True)
-    for m in testMessages:
+    for m in TEST_MESSAGES:
         for sock in sockets:
             if DEBUG:
                 print('< ', m)
@@ -76,7 +76,7 @@ def portListeningMultiConnection():
         reason = f'Return code: {returncode}'
         return False, reason
 
-    isAllMessagesDelivered = all(all(any(r.find(m) != -1 for r in stdoutResult) for m in testMessages) for s in sockets)
+    isAllMessagesDelivered = all(all(any(r.find(m) != -1 for r in stdoutResult) for m in TEST_MESSAGES) for s in sockets)
     reason = 'All messages are not delivered' if isAllMessagesDelivered else None
     return isAllMessagesDelivered, reason
 
@@ -89,7 +89,7 @@ def portListeningUsedPort():
     usedPort = usedSocket.getsockname()[-1]
 
     result, clientSocket = process([path, '-p', str(usedPort)])
-    for m in testMessages:
+    for m in TEST_MESSAGES:
         if DEBUG:
             print('< ', m)
         clientSocket.sendto(m.encode(), serverEndPoint)
@@ -123,7 +123,7 @@ def portListeningSpecificInterface():
 
     result, clientSocket = process([path, '-p', port, '-n', networkInterface])
 
-    for m in testMessages:
+    for m in TEST_MESSAGES:
         if DEBUG:
             print('< ', m)
         clientSocket.sendto(m.encode(), endPoint)
@@ -136,7 +136,7 @@ def portListeningSpecificInterface():
         reason = f'Return code: {returncode}'
         return False, reason
 
-    isAllMessagesDelivered = all(any(r.find(m) != -1 for r in stdoutResult) for m in testMessages)
+    isAllMessagesDelivered = all(any(r.find(m) != -1 for r in stdoutResult) for m in TEST_MESSAGES)
     reason = 'All messages are not delivered' if isAllMessagesDelivered else None
     return isAllMessagesDelivered, reason
 
@@ -157,12 +157,12 @@ def portListeningSpecificInterfaceUnavailable():
 def echoServer():
     result, clientSocket = process([path, '-p', port])
 
-    for m in testMessages:
+    for m in TEST_MESSAGES:
         if DEBUG:
             print('< ', m)
         clientSocket.sendto(m.encode(), serverEndPoint)
 
-    data = [clientSocket.recv(len(m)).decode() for m in testMessages]
+    data = [clientSocket.recv(len(m)).decode() for m in TEST_MESSAGES]
     if DEBUG:
         for d in data:
             print('> ', d)
@@ -172,7 +172,7 @@ def echoServer():
         reason = f'Return code: {returncode}'
         return False, reason
 
-    isAllMessagesDelivered = data == testMessages
+    isAllMessagesDelivered = data == TEST_MESSAGES
     reason = 'All messages are not delivered' if isAllMessagesDelivered else None
     return isAllMessagesDelivered, reason
 
@@ -182,13 +182,13 @@ def echoServer():
 def echoMultiConnection():
     result, sockets = process([path, '-p', port], True)
 
-    for m in testMessages:
+    for m in TEST_MESSAGES:
         for sock in sockets:
             if DEBUG:
                 print('< ', m)
             sock.sendto(m.encode(), serverEndPoint)
 
-    data = [[sock.recv(len(m)).decode() for m in testMessages] for sock in sockets]
+    data = [[sock.recv(len(m)).decode() for m in TEST_MESSAGES] for sock in sockets]
 
     if DEBUG:
         print("Data is", data)
@@ -198,7 +198,7 @@ def echoMultiConnection():
         reason = f'Return code: {returncode}'
         return False, reason
 
-    isAllMessagesDelivered = all(d == testMessages for d in data)
+    isAllMessagesDelivered = all(d == TEST_MESSAGES for d in data)
     reason = 'All messages are not delivered' if isAllMessagesDelivered else None
     return isAllMessagesDelivered, reason
 
