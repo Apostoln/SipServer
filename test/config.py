@@ -1,5 +1,6 @@
 from singleton import singleton
 
+
 @singleton
 class Config:
     address = None

@@ -134,8 +134,7 @@ def portListeningSpecificInterface():
 
     returncode = result.poll()
     if returncode:
-        reason = f
-        'Return code: {returncode}'
+        reason = f'Return code: {returncode}'
         return False, reason
 
     isAllMessagesDelivered = all(any(r.find(m) != -1 for r in stdoutResult) for m in testMessages)
@@ -169,8 +168,7 @@ def echoServer():
 
     returncode = result.poll()
     if returncode:
-        reason = f
-        'Return code: {returncode}'
+        reason = f'Return code: {returncode}'
         return False, reason
 
     isAllMessagesDelivered = data == testMessages
@@ -195,8 +193,7 @@ def echoMultiConnection():
 
     returncode = result.poll()
     if returncode:
-        reason = f
-        'Return code: {returncode}'
+        reason = f'Return code: {returncode}'
         return False, reason
 
     isAllMessagesDelivered = all(d == testMessages for d in data)

@@ -14,8 +14,8 @@ def test(testFunction):
         print('Reason:', reason)
     return resultTest
 
-def main():
-    results = [test(name) for name in testflow1.tests]
+def main(tests):
+    results = [test(name) for name in tests]
 
     if all(results):
         print('\nAll tests are passed')
@@ -23,16 +23,18 @@ def main():
         print('\nSome tests failed')
     else:
         print("\nAll tests are failed")
-    print('{0}/{1}'.format(results.count(True), len(testflow1.tests)))
+    print('{0}/{1}'.format(results.count(True), len(tests)))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
+    parser.add_argument('-t', '--testflow', required='True', help='Number of test')
     parser.add_argument('-s', '--sipserver', required='True', help='Path to SipServer')
     parser.add_argument('-a', '--address', default=LOCALHOST, help='IP address of SipServer')
     parser.add_argument('-p', '--port', help='Port of SipServer')
     parser.add_argument('-i', '--interface', help='Network interface')
     parser.add_argument('-l', '--loglevel', help='Logger level')
+
     args = parser.parse_args()
 
     config = Config()
@@ -43,6 +45,22 @@ if __name__ == '__main__':
     config.DEBUG = True if args.loglevel else False
     config.serverEndPoint = (config.address, int(config.port))
 
-    import testflow1
+    testflow = None
+    testflownumber = 0
+    try:
+        testflownumber = int(args.testflow)
+    except ValueError:
+        print('--testflow argument must be integer in range [1,2]')
+        exit(1)
 
-    main()
+    if testflownumber == 1:
+        import testflow1
+        testflow = testflow1.tests
+    elif testflownumber == 2:
+        print('Not implemented yet')
+        exit(1)
+    else:
+        print('--testflow argument must be integer in range [1,2]')
+        exit(1)
+
+    main(testflow)
