@@ -12,8 +12,11 @@ target_include_directories(argparse INTERFACE lib/argparse )
 add_library(asio INTERFACE )
 target_include_directories(asio INTERFACE lib/asio)
 
+add_library(easyloggingpp lib/easyloggingpp/src/easylogging++.cc)
+target_include_directories(easyloggingpp INTERFACE lib/easyloggingpp/src)
+
 include_directories(src)
 
 set(SOURCE_FILES main.cpp src/SipServer.hpp src/SipServer.cpp src/Builder.cpp src/Builder.hpp)
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
-target_link_libraries(${PROJECT_NAME} asio argparse pthread)
+target_link_libraries(${PROJECT_NAME} asio argparse easyloggingpp pthread)

@@ -1,10 +1,15 @@
+#include <argparse.hpp>
+#include <easylogging++.h>
+
 #include <SipServer.hpp>
 #include <Builder.hpp>
-#include <argparse.hpp>
+
+INITIALIZE_EASYLOGGINGPP //crutch for logger
 
 using uint = unsigned int;
 
 int main(int argc, const char* argv[]) {
+    LOG(INFO) << "Sip server is started";
     ArgumentParser parser;
     parser.addArgument("-p", "--port", 1);
     parser.addArgument("-n", "--networkInterface", 1);
