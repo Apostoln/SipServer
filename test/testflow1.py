@@ -2,6 +2,7 @@ import socket
 import subprocess
 import time
 import platform
+import logging
 
 from config import Config
 from utils import timeout, printName, printConsoleOut
@@ -12,7 +13,6 @@ address = config.address
 port = config.port
 path = config.path
 interface = config.interface
-DEBUG = config.DEBUG
 serverEndPoint = config.serverEndPoint
 
 TIMEOUT_LIMIT = 5
@@ -41,10 +41,8 @@ def portListening():
     result, clientSocket = process([path, '-p', port])
 
     for m in TEST_MESSAGES:
-        if DEBUG:
-            print('< ', m)
+        logging.debug(f'< {m}')
         clientSocket.sendto(m.encode(), serverEndPoint)
-
 
     stdoutResult = [x.decode() for x in result.stdout]
     printConsoleOut(result)
@@ -64,8 +62,7 @@ def portListeningMultiConnection():
     result, sockets = process([path, '-p', port], True)
     for m in TEST_MESSAGES:
         for sock in sockets:
-            if DEBUG:
-                print('< ', m)
+            logging.debug(f'< {m}')
             sock.sendto(m.encode(), serverEndPoint)
 
     stdoutResult = [x.decode() for x in result.stdout]
@@ -90,8 +87,7 @@ def portListeningUsedPort():
 
     result, clientSocket = process([path, '-p', str(usedPort)])
     for m in TEST_MESSAGES:
-        if DEBUG:
-            print('< ', m)
+        logging.debug(f'< {m}')
         clientSocket.sendto(m.encode(), serverEndPoint)
 
     printConsoleOut(result)
@@ -104,8 +100,7 @@ def portListeningUsedPort():
 @timeout(TIMEOUT_LIMIT)
 def portListeningUnavailablePort():
     osType = platform.system()
-    if DEBUG:
-        print("OS is", osType)
+    logging.debug(f'OS is  {osType}')
     if osType != 'Linux':
         return True
     result, _ = process([path, '-p', '54'])
@@ -124,8 +119,7 @@ def portListeningSpecificInterface():
     result, clientSocket = process([path, '-p', port, '-n', networkInterface])
 
     for m in TEST_MESSAGES:
-        if DEBUG:
-            print('< ', m)
+        logging.debug(f'< {m}')
         clientSocket.sendto(m.encode(), endPoint)
 
     stdoutResult = [x.decode() for x in result.stdout]
@@ -158,14 +152,14 @@ def echoServer():
     result, clientSocket = process([path, '-p', port])
 
     for m in TEST_MESSAGES:
-        if DEBUG:
-            print('< ', m)
+        logging.debug(f'< {m}')
         clientSocket.sendto(m.encode(), serverEndPoint)
 
     data = [clientSocket.recv(len(m)).decode() for m in TEST_MESSAGES]
-    if DEBUG:
+
+    if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
         for d in data:
-            print('> ', d)
+            logging.debug(f'> {d}')
 
     returncode = result.poll()
     if returncode:
@@ -184,14 +178,12 @@ def echoMultiConnection():
 
     for m in TEST_MESSAGES:
         for sock in sockets:
-            if DEBUG:
-                print('< ', m)
+            logging.debug(f'< {m}')
             sock.sendto(m.encode(), serverEndPoint)
 
     data = [[sock.recv(len(m)).decode() for m in TEST_MESSAGES] for sock in sockets]
 
-    if DEBUG:
-        print("Data is", data)
+    logging.debug(f'Data is: {data}')
 
     returncode = result.poll()
     if returncode:

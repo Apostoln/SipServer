@@ -1,10 +1,11 @@
 import functools
 import signal
 import sys
+import logging
 
 from config import Config
 config = Config()
-DEBUG = config.DEBUG
+
 
 def freePort():
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
@@ -42,16 +43,17 @@ def timeout(seconds):
 def printName(fn):
     @functools.wraps(fn)
     def wrapped():
-        if DEBUG:
-            print(fn.__name__)
+        if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
+            print('\n'+fn.__name__)
         return fn()
     return wrapped
 
 def printConsoleOut(result):
-    if DEBUG:
+    if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
         stdoutResult = [x.decode() for x in result.stdout]
         stderrResult = [x.decode() for x in result.stderr]
         for r in stdoutResult:
-            print('> ', r[:-1])
+            logging.debug(f'> {r[:-1]}')
         for e in stderrResult:
-            print(e, file=sys.stderr)
+            logging.debug(f'stderr: {e}')
+

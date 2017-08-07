@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 
 import argparse
+import logging
+import sys
 
 from utils import freePort
 from config import Config
 
 LOCALHOST = '127.0.0.1'
+
 
 def test(testFunction):
     resultTest, reason = testFunction()
@@ -42,8 +45,12 @@ if __name__ == '__main__':
     config.port = str(args.port if args.port else freePort())
     config.path = args.sipserver
     config.interface = args.interface if args.interface else LOCALHOST
-    config.DEBUG = True if args.loglevel else False
     config.serverEndPoint = (config.address, int(config.port))
+
+    debug = True if args.loglevel else False
+    logging.basicConfig(stream=sys.stdout,
+                        format='%(message)s',
+                        level=(logging.DEBUG if debug else logging.WARNING))
 
     testflow = None
     testflownumber = 0

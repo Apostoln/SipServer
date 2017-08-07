@@ -7,5 +7,4 @@ class Config:
     port = None
     path = None
     interface = None
-    DEBUG = None
     serverEndPoint = None
