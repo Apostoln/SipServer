@@ -57,17 +57,14 @@ if __name__ == '__main__':
     try:
         testflownumber = int(args.testflow)
     except ValueError:
-        print('--testflow argument must be integer in range [1,2]')
+        print('--testflow argument must be integer in range [1,1]')
         exit(1)
 
     if testflownumber == 1:
         import testflow1
         testflow = testflow1.tests
-    elif testflownumber == 2:
-        print('Not implemented yet')
-        exit(1)
     else:
-        print('--testflow argument must be integer in range [1,2]')
+        print('--testflow argument must be integer in range [1,1]')
         exit(1)
 
     main(testflow)
