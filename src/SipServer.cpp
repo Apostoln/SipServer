@@ -3,21 +3,28 @@
 #include <iostream>
 #include <algorithm>
 
+#include <easylogging++.h>
+
 #include <SipServer.hpp>
 
 SipServer::SipServer():
     serverIo(new asio::io_service()),
     networkInterface(asio::ip::address()),
     port(0)
-{}
+{
+    LOG(DEBUG) << "Constructor SipServer() is called";
+}
 
 SipServer::SipServer(asio::io_service* ioService, asio::ip::address networkInterface, unsigned short port):
     serverIo(ioService),
     networkInterface(networkInterface),
     port(port)
-{}
+{
+    LOG(DEBUG) << "Constructor SipServer(asio::io_service*, asio::ip::address, unsigned short) is called";
+}
 
 SipServer::~SipServer() {
+    LOG(DEBUG) << "Destructor ~SipServer() is called";
     delete(serverSocket);
     delete(serverIo);
 }
@@ -29,23 +36,28 @@ void SipServer::init() {
     if(port == 0) {
         this->port = serverSocket->local_endpoint().port();
     }
+
+    LOG(DEBUG) << "SipServer is initialized on " << networkInterface.to_string()
+               << ":"  << this->port;
 }
 
 void SipServer::changePort(unsigned short port) {
     setPort(port);
     this->updateSocket();
+    LOG(DEBUG) << "Port is changed to " << this->port;
 }
 
 void SipServer::changeServerIo(asio::io_service* serverIo) {
     setServerIo(serverIo);
     this->updateSocket();
+    LOG(DEBUG) << "ServerIO is changed";
 }
 
 void SipServer::changeNetworkInterface(asio::ip::address networkInterface) {
     setNetworkInterface(networkInterface);
     this->updateSocket();
+    LOG(DEBUG) << "Network interface is changed to " << networkInterface.to_string();
 }
-
 
 void SipServer::updateSocket() {
     try {
@@ -58,9 +70,11 @@ void SipServer::updateSocket() {
         }
 
         this->serverSocket = new asio::ip::udp::socket(*serverIo, endPoint);
+        LOG(DEBUG) << "Server socket is updated";
     }
     catch (asio::system_error & e) {
         auto errorCode = e.code().value();
+        //TODO:Move error messages to logger
         std::cerr << "Error code: "  << e.code() << std::endl;
         std::cerr << "\"" << e.what() << "\"" << std::endl;
         switch (errorCode) {
@@ -85,21 +99,29 @@ void SipServer::run() {
 
     std::cout << "Server is started" << std::endl
               << "Listening UDP port " << this->getPort() << std::endl;
+    LOG(INFO) << "Server is started";
+    LOG(INFO) << "Listening UDP port " << this->getPort();
 
     while(true) {
         char buff[1024] = {0};
         //Amount of received bytes
         size_t bytes = serverSocket->receive_from(asio::buffer(buff), clientEndPoint);
+        LOG(INFO) << bytes << " bytes received ";
 
         //Add new connection if it is not exist
         if (std::find(clients.begin(), clients.end(), clientEndPoint) == clients.end()) {
             clients.push_back(clientEndPoint);
             std::cout << "Client was added: " << clientEndPoint.address() << ":" << clientEndPoint.port() << std::endl;
+            LOG(INFO) << "Client was added: " << clientEndPoint.address() << ":" << clientEndPoint.port();
         }
 
         if (bytes != 0) {
             serverSocket->send_to(asio::buffer(buff), clientEndPoint);
             std::cout << clientEndPoint.address() << ":"
+                      << clientEndPoint.port() << "> "
+                      << buff << std::endl;
+
+            LOG(INFO) << clientEndPoint.address() << ":"
                       << clientEndPoint.port() << "> "
                       << buff << std::endl;
 
@@ -114,10 +136,13 @@ void SipServer::run() {
 void SipServer::removeClient(asio::ip::udp::endpoint& client) {
     std::cout << "Connection with " << client.address() << ":" << client.port()
               << " is closed" << std::endl;
+    LOG(INFO) << "Connection with " << client.address() << ":" << client.port()
+              << " is closed" << std::endl;
 
     clients.erase(std::remove(clients.begin(), clients.end(), client), clients.end());
     if (clients.empty()) {
         std::cout << "There are no connections now, server is closed" << std::endl;
+        LOG(INFO) << "There are no connections now, server is closed" << std::endl;
         serverSocket->close();
         exit(0);
     }
