@@ -20,7 +20,7 @@ class SipMessage {
         SipMessageType type;
     public:
         SipMessage() = default;
-
+        operator std::string() const;
 };
 
 

@@ -11,7 +11,7 @@ using namespace std::string_literals;
 #include <SipServer.hpp>
 #include <ExitException.hpp>
 #include <ErrorCode.hpp>
-#include "ErrorCode.hpp"
+#include <SipParser.hpp>
 
 SipServer::SipServer():
     serverIo(new asio::io_service()),
@@ -135,7 +135,10 @@ void SipServer::run() {
         }
 
         if (bytesReceived != 0) {
-            size_t bytesSent = serverSocket->send_to(asio::buffer(buff), clientEndPoint);
+            SipMessage incomingMessage = SipParser::parse(buff);
+            auto outgoingMessage = formOutgoingMessage(incomingMessage);
+            size_t bytesSent = serverSocket->send_to(asio::buffer(static_cast<std::string>(outgoingMessage)),
+                                                     clientEndPoint);
             LOG(INFO) << bytesSent << " bytes sent: ";
 
             std::cout << clientEndPoint.address() << ":"

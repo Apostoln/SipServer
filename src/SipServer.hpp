@@ -7,6 +7,8 @@
 #include <asio/io_service.hpp>
 #include <asio/ip/udp.hpp>
 
+#include <SipMessage.hpp>
+
 class SipServer {
     private:
         asio::io_service* serverIo; // Object for connecting to I/O services of OS.
@@ -18,6 +20,10 @@ class SipServer {
         void setPort(unsigned short port);
         void setServerIo(asio::io_service* serverIo);
         void setNetworkInterface(asio::ip::address networkInterface);
+
+        static SipMessage formOutgoingMessage(SipMessage incomingMessage) {
+            return incomingMessage;
+        }
 
     public:
         class Builder;
