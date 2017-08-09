@@ -30,7 +30,8 @@ a=sendrecv"""
 
 def process(command, multiConnection=False):
     result = []
-
+    command.append('-f')
+    command.append(LOGGER_PATH)
     commandResult = subprocess.Popen(command)
     result.append(commandResult)
 
@@ -53,21 +54,37 @@ def requestParsing():
     for line in TEST_SIP_REQUEST.split('\n')[1:]:
         if not line:
             break
-        splited = line.split(':')
+        splited = line.split(':',1)
         headers.append(splited[0])
-        values.append(''.join(splited[1:]))
+        values.append(''.join(splited[1:]).lstrip())
 
     result, clientSocket = process([path, '-p', port])
     clientSocket.sendto(TEST_SIP_REQUEST.encode(), serverEndPoint)
 
-    #logging.debug('Send:')
-    #logging.debug(TEST_SIP_REQUEST)
+    logging.debug('Send:')
+    for line in TEST_SIP_REQUEST.split('\n'):
+        logging.debug(f'<{line}')
 
     data = clientSocket.recv(4096).decode()
     if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
         for d in data.split('\n'):
             logging.debug(f'> {d}')
-    clientSocket.close()
-    return True, None
+
+
+    headersLine = [d for d in data.split('\n') if d.find('Headers') != -1][0]
+    valuesLine = [d for d in data.split('\n') if d.find('Values') != -1][0]
+
+    headersFlag = all(headersLine.find(h) != -1 for h in headers)
+    valuesFlag = all(valuesLine.find(v) != -1 for v in values)
+    reason = ''
+
+    if not headersFlag:
+        reason += 'Not all headers are present in Headers header\n'
+    if not valuesFlag:
+        reason += "Not all values are present in Values header"
+
+    return headersFlag and valuesFlag, reason
+
+
 
 tests = [requestParsing, ]

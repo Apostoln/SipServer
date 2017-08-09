@@ -72,6 +72,7 @@ def checkMessageInLog(isInput):
     return isAllMessagedLogged, reason
 
 
+
 def process(command, multiConnection=False):
     result = []
     command.append('-f')
@@ -140,7 +141,6 @@ def unavailableInterfaceLog():
     return checkReturnCode(clientSocket, correctCode=3)
 
 tests = [inMessageInLog, outMessageInLog, usedPortInLog, unavailablePortInLog, unavailableInterfaceLog]
-
 
 
 
