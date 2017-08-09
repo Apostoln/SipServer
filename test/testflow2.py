@@ -4,12 +4,14 @@ import time
 import platform
 import logging
 import re
+import logging
+import subprocess
+import time
 
 from config import Config
-from utils import timeout, printName, handleLogDir, printConsoleOut
+from utils import timeout, printName, handleLogDir
 
 config = Config()
-
 address = config.address
 port = config.port
 path = config.path
@@ -138,3 +140,8 @@ def unavailableInterfaceLog():
     return checkReturnCode(clientSocket, correctCode=3)
 
 tests = [inMessageInLog, outMessageInLog, usedPortInLog, unavailablePortInLog, unavailableInterfaceLog]
+
+
+
+
+
