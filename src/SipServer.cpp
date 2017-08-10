@@ -77,19 +77,26 @@ void SipServer::updateSocket() {
         //TODO:Move error messages to logger
         std::cerr << "Error code: "  << e.code() << std::endl;
         std::cerr << "\"" << e.what() << "\"" << std::endl;
+        LOG(ERROR) << "Error code: "  << e.code() << std::endl;
+        LOG(ERROR) << "\"" << e.what() << "\"" << std::endl;
         switch (errorCode) {
             case 13:
                 std::cerr << "Port is unavailable" << std::endl;
+                LOG(ERROR) << "Port is unavailable" << std::endl;
                 if (port < 1024) {
                     std::cerr << "Port must be > 1024 on Unix, port is " << port << std::endl;
+                    LOG(ERROR) << "Port must be > 1024 on Unix, port is " << port << std::endl;
                 }
                 break;
             case 99:
                 std::cerr << "Network interface is not supported: " << networkInterface.to_string() << std::endl;
+                LOG(ERROR) << "Network interface is not supported: " << networkInterface.to_string() << std::endl;
                 break;
             default:
                 std::cerr << "Unknown asio error" << std::endl;
+                LOG(ERROR) << "Unknown asio error" << std::endl;
         }
+        LOG(DEBUG) << "Exit with error code" << errorCode << std::endl;
         exit(errorCode);
     }
 }
@@ -111,15 +118,11 @@ void SipServer::run() {
         //Add new connection if it is not exist
         if (std::find(clients.begin(), clients.end(), clientEndPoint) == clients.end()) {
             clients.push_back(clientEndPoint);
-            std::cout << "Client was added: " << clientEndPoint.address() << ":" << clientEndPoint.port() << std::endl;
-            LOG(INFO) << "Client was added: " << clientEndPoint.address() << ":" << clientEndPoint.port();
+            LOG(INFO) << "Client was added: " << clientEndPoint.address() << ":" << clientEndPoint.port() << std::endl;
         }
 
         if (bytes != 0) {
             serverSocket->send_to(asio::buffer(buff), clientEndPoint);
-            std::cout << clientEndPoint.address() << ":"
-                      << clientEndPoint.port() << "> "
-                      << buff << std::endl;
 
             LOG(INFO) << clientEndPoint.address() << ":"
                       << clientEndPoint.port() << "> "
@@ -134,8 +137,6 @@ void SipServer::run() {
 }
 
 void SipServer::removeClient(asio::ip::udp::endpoint& client) {
-    std::cout << "Connection with " << client.address() << ":" << client.port()
-              << " is closed" << std::endl;
     LOG(INFO) << "Connection with " << client.address() << ":" << client.port()
               << " is closed" << std::endl;
 
