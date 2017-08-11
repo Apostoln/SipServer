@@ -20,6 +20,9 @@ TEST_MESSAGES = ['Hello', 'World', 'q']
 
 def process(command, multiConnection=False):
     result = []
+    command.append('-l')
+    command.append('DEBUG')
+
     commandResult = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     result.append(commandResult)
 
