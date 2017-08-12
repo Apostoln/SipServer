@@ -57,14 +57,17 @@ if __name__ == '__main__':
     try:
         testflownumber = int(args.testflow)
     except ValueError:
-        print('--testflow argument must be integer in range [1,1]')
+        print('--testflow argument must be integer in range [1,2]')
         exit(1)
 
     if testflownumber == 1:
         import testflow1
         testflow = testflow1.tests
+    elif testflownumber == 2:
+        import testflow2
+        testflow = testflow2.tests
     else:
-        print('--testflow argument must be integer in range [1,1]')
+        print('--testflow argument must be integer in range [1,2]')
         exit(1)
 
     main(testflow)

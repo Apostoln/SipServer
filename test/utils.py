@@ -3,6 +3,8 @@ import signal
 import sys
 import logging
 import socket
+import os
+import shutil
 
 from config import Config
 config = Config()
@@ -48,6 +50,16 @@ def printName(fn):
             print('\n'+fn.__name__)
         return fn()
     return wrapped
+
+def handleLogDir(fn):
+    @functools.wraps(fn)
+    def wrapped():
+        res = fn()
+        shutil.rmtree('logs', ignore_errors=True)
+        return res
+    return wrapped
+
+
 
 def printConsoleOut(result):
     if logging.getLogger().getEffectiveLevel() == logging.DEBUG:

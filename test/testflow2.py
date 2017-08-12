@@ -1,5 +1,11 @@
+import socket
+import subprocess
+import time
+import platform
+import logging
+
 from config import Config
-from utils import timeout, printName, printConsoleOut
+from utils import timeout, printName, handleLogDir
 
 config = Config()
 
@@ -14,7 +20,7 @@ TEST_MESSAGES = ['Hello', 'World', 'q']
 
 def process(command, multiConnection=False):
     result = []
-    commandResult = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    commandResult = subprocess.Popen(command)
     result.append(commandResult)
 
     if not multiConnection:
@@ -28,18 +34,52 @@ def process(command, multiConnection=False):
     time.sleep(0.1)
     return tuple(result)
 
-def inMessageInLog():
-    pass
 
+@handleLogDir
+@printName
+@timeout(TIMEOUT_LIMIT)
+def inMessageInLog():
+    result, clientSocket = process([path, '-p', port, '-l', 'INFO'])
+
+    for m in TEST_MESSAGES:
+        logging.debug(f'< {m}')
+        clientSocket.sendto(m.encode(), serverEndPoint)
+
+    logFile = open('./logs/myeasylog.log')
+    print(logFile)
+
+    reason = None
+    isAllMessagedLogged = all(any(line.find(x) != -1 for line in logFile) for x in TEST_MESSAGES)
+    if not isAllMessagedLogged:
+        reason = 'Not all input messaged are logged'
+    return isAllMessagedLogged, None
+
+
+@handleLogDir
+@printName
+@timeout(TIMEOUT_LIMIT)
 def outMessageInLog():
     pass
 
+
+@handleLogDir
+@printName
+@timeout(TIMEOUT_LIMIT)
 def usedPortInLog():
     pass
 
+
+@handleLogDir
+@printName
+@timeout(TIMEOUT_LIMIT)
 def unavailablePortInLog():
     pass
 
+
+@handleLogDir
+@printName
+@timeout(TIMEOUT_LIMIT)
 def unavailableInterfaceLog():
     pass
 
+tests = [inMessageInLog]
