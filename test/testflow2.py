@@ -49,6 +49,11 @@ def inMessageInLog():
     print(logFile)
 
     reason = None
+    if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
+        for line in logFile:
+            logging.debug(f'log: {line[:-1]}')
+
+    logFile = open('./logs/myeasylog.log')
     isAllMessagedLogged = all(any(line.find(x) != -1 for line in logFile) for x in TEST_MESSAGES)
     if not isAllMessagedLogged:
         reason = 'Not all input messaged are logged'
