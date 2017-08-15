@@ -73,30 +73,37 @@ void SipServer::updateSocket() {
         LOG(DEBUG) << "Server socket is updated";
     }
     catch (asio::system_error & e) {
-        auto errorCode = e.code().value();
+        auto asioErrorCode = e.code().value();
         //TODO:Move error messages to logger
-        std::cerr << "Error code: "  << e.code() << std::endl;
+        std::cerr << "Asio error code: "  << e.code() << std::endl;
         std::cerr << "\"" << e.what() << "\"" << std::endl;
-        LOG(ERROR) << "Error code: "  << e.code() << std::endl;
-        LOG(ERROR) << "\"" << e.what() << "\"" << std::endl;
-        switch (errorCode) {
+        LOG(ERROR) << "Asio error code: "  << e.code();
+        LOG(ERROR) << "\"" << e.what() << "\"";
+        int errorCode = 0;
+        switch (asioErrorCode) {
             case 13:
                 std::cerr << "Port is unavailable" << std::endl;
-                LOG(ERROR) << "Port is unavailable" << std::endl;
+                LOG(ERROR) << "Port is unavailable";
                 if (port < 1024) {
                     std::cerr << "Port must be > 1024 on Unix, port is " << port << std::endl;
-                    LOG(ERROR) << "Port must be > 1024 on Unix, port is " << port << std::endl;
+                    LOG(ERROR) << "Port must be > 1024 on Unix, port is " << port;
+                    errorCode = 2;
+                }
+                else {
+                    errorCode = 1;
                 }
                 break;
             case 99:
                 std::cerr << "Network interface is not supported: " << networkInterface.to_string() << std::endl;
-                LOG(ERROR) << "Network interface is not supported: " << networkInterface.to_string() << std::endl;
+                LOG(ERROR) << "Network interface is not supported: " << networkInterface.to_string();
+                errorCode = 3;
                 break;
             default:
                 std::cerr << "Unknown asio error" << std::endl;
-                LOG(ERROR) << "Unknown asio error" << std::endl;
+                LOG(ERROR) << "Unknown asio error";
+                errorCode = 4;
         }
-        LOG(DEBUG) << "Exit with error code" << errorCode << std::endl;
+        LOG(DEBUG) << "Exit with error code " << errorCode;
         exit(errorCode);
     }
 }

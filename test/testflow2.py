@@ -3,9 +3,10 @@ import subprocess
 import time
 import platform
 import logging
+import re
 
 from config import Config
-from utils import timeout, printName, handleLogDir
+from utils import timeout, printName, handleLogDir, printConsoleOut
 
 config = Config()
 
@@ -17,6 +18,8 @@ serverEndPoint = config.serverEndPoint
 
 TIMEOUT_LIMIT = 5
 TEST_MESSAGES = ['Hello', 'World', 'q']
+ERROR_MSG_PATTERN = re.compile(R"Exit with error code (?P<errorCode>\d+)")
+
 
 def process(command, multiConnection=False):
     result = []
@@ -56,7 +59,7 @@ def inMessageInLog():
     isAllMessagedLogged = all(any(line.find(x) != -1 for line in logFile) for x in TEST_MESSAGES)
     if not isAllMessagedLogged:
         reason = 'Not all input messaged are logged'
-    return isAllMessagedLogged, None
+    return isAllMessagedLogged, reason
 
 
 @handleLogDir
@@ -79,27 +82,108 @@ def outMessageInLog():
     logFile.seek(0)
     isAllMessagedLogged = all(any(line.find(x) != -1 for line in logFile) for x in TEST_MESSAGES)
     if not isAllMessagedLogged:
-        reason = 'Not all input messaged are logged'
-    return isAllMessagedLogged, None
+        reason = 'Not all output messaged are logged'
+    return isAllMessagedLogged, reason
 
 
 @handleLogDir
 @printName
 @timeout(TIMEOUT_LIMIT)
 def usedPortInLog():
-    pass
+    usedSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    usedSocket.sendto("q".encode(), serverEndPoint)
+    usedPort = usedSocket.getsockname()[-1]
+
+    result, clientSocket = process([path, '-p', str(usedPort), '-l', 'DEBUG'])
+    for m in TEST_MESSAGES:
+        logging.debug(f'< {m}')
+        clientSocket.sendto(m.encode(), serverEndPoint)
+
+    logFile = open('./logs/myeasylog.log')
+
+    reason = None
+    if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
+        for line in logFile:
+            logging.debug(f'log: {line[:-1]}')
+
+    logFile.seek(0)
+    fileText = logFile.read()
+    matches = re.findall(ERROR_MSG_PATTERN,fileText)
+    print(matches)
+    if not matches:
+        reason = 'There are messages about error code in log'
+        return False, reason
+    CORRECT_CODE = 1
+    RETURN_CODE = matches[0]
+    isReturnCodeCorrect = RETURN_CODE == CORRECT_CODE
+    if not isReturnCodeCorrect:
+        reason = f"Error code is incorrect. Must be {CORRECT_CODE}, now {matches[0]}"
+    return isReturnCodeCorrect, reason
 
 @handleLogDir
 @printName
 @timeout(TIMEOUT_LIMIT)
 def unavailablePortInLog():
-    pass
+    osType = platform.system()
+    logging.debug(f'OS is  {osType}')
+    if osType != 'Linux':
+        return True
+    result, _ = process([path, '-p', '54'])
+    logFile = open('./logs/myeasylog.log')
+
+    reason = None
+    if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
+        for line in logFile:
+            logging.debug(f'log: {line[:-1]}')
+
+    logFile.seek(0)
+    fileText = logFile.read()
+    matches = re.findall(ERROR_MSG_PATTERN,fileText)
+    print(matches)
+    if not matches:
+        reason = 'There are messages about error code in log'
+        return False, reason
+    CORRECT_CODE = 2
+    RETURN_CODE = matches[0]
+    isReturnCodeCorrect = RETURN_CODE == CORRECT_CODE
+    if not isReturnCodeCorrect:
+        reason = f"Error code is incorrect. Must be {CORRECT_CODE}, now {mathes[0]}"
+    return isReturnCodeCorrect, reason
 
 
 @handleLogDir
 @printName
 @timeout(TIMEOUT_LIMIT)
 def unavailableInterfaceLog():
-    pass
+    usedSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    usedSocket.sendto("q".encode(), serverEndPoint)
+    usedPort = usedSocket.getsockname()[-1]
 
-tests = [inMessageInLog, outMessageInLog]
+    result, clientSocket = process([path, '-p', str(usedPort), '-l', 'DEBUG'])
+    for m in TEST_MESSAGES:
+        logging.debug(f'< {m}')
+        clientSocket.sendto(m.encode(), serverEndPoint)
+
+    logFile = open('./logs/myeasylog.log')
+
+    reason = None
+    if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
+        for line in logFile:
+            logging.debug(f'log: {line[:-1]}')
+
+    logFile.seek(0)
+    fileText = logFile.read()
+    matches = re.findall(ERROR_MSG_PATTERN, fileText)
+    print(matches)
+    if not matches:
+        reason = 'There are messages about error code in log'
+        return False, reason
+    CORRECT_CODE = 3
+    RETURN_CODE = matches[0]
+    isReturnCodeCorrect = RETURN_CODE == CORRECT_CODE
+    if not isReturnCodeCorrect:
+        reason = f"Error code is incorrect. Must be {CORRECT_CODE}, now {matches[0]}"
+    return isReturnCodeCorrect, reason
+
+#tests = [inMessageInLog, outMessageInLog]
+tests = [usedPortInLog, unavailablePortInLog, unavailableInterfaceLog]
