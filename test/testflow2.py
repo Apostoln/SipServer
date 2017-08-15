@@ -89,7 +89,6 @@ def outMessageInLog():
 def usedPortInLog():
     pass
 
-
 @handleLogDir
 @printName
 @timeout(TIMEOUT_LIMIT)

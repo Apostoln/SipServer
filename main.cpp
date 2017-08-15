@@ -9,6 +9,8 @@ INITIALIZE_EASYLOGGINGPP //crutch for logger
 
 using uint = unsigned int;
 
+el::Level defaultLogLevel = el::Level::Info;
+
 int main(int argc, const char* argv[]) {
     ArgumentParser parser;
     parser.addArgument("-p", "--port", 1);
@@ -20,6 +22,7 @@ int main(int argc, const char* argv[]) {
     auto portArg = parser.retrieve<std::string>("port");
     auto networkInterfaceArg = parser.retrieve<std::string>("networkInterface");
     auto logLevel = getLogLevel(parser.retrieve<std::string>("logLevel"));
+    logLevel = logLevel == el::Level::Unknown? defaultLogLevel : logLevel;
     bool isConsoleOut = !parser.retrieve<std::string>("cout").empty() ;
 
     el::Loggers::reconfigureAllLoggers(el::ConfigurationType::Format, "%level %datetime{%H:%m:%s} [%fbase]: %msg");
