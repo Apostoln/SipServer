@@ -46,14 +46,13 @@ def inMessageInLog():
         clientSocket.sendto(m.encode(), serverEndPoint)
 
     logFile = open('./logs/myeasylog.log')
-    print(logFile)
 
     reason = None
     if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
         for line in logFile:
             logging.debug(f'log: {line[:-1]}')
 
-    logFile = open('./logs/myeasylog.log')
+    logFile.seek(0)
     isAllMessagedLogged = all(any(line.find(x) != -1 for line in logFile) for x in TEST_MESSAGES)
     if not isAllMessagedLogged:
         reason = 'Not all input messaged are logged'
@@ -64,7 +63,24 @@ def inMessageInLog():
 @printName
 @timeout(TIMEOUT_LIMIT)
 def outMessageInLog():
-    pass
+    result, clientSocket = process([path, '-p', port, '-l', 'INFO'])
+
+    for m in TEST_MESSAGES:
+        logging.debug(f'< {m}')
+        clientSocket.sendto(m.encode(), serverEndPoint)
+
+    logFile = open('./logs/myeasylog.log')
+
+    reason = None
+    if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
+        for line in logFile:
+            logging.debug(f'log: {line[:-1]}')
+
+    logFile.seek(0)
+    isAllMessagedLogged = all(any(line.find(x) != -1 for line in logFile) for x in TEST_MESSAGES)
+    if not isAllMessagedLogged:
+        reason = 'Not all input messaged are logged'
+    return isAllMessagedLogged, None
 
 
 @handleLogDir
@@ -87,4 +103,4 @@ def unavailablePortInLog():
 def unavailableInterfaceLog():
     pass
 
-tests = [inMessageInLog]
+tests = [inMessageInLog, outMessageInLog]

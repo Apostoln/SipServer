@@ -55,7 +55,7 @@ def handleLogDir(fn):
     @functools.wraps(fn)
     def wrapped():
         res = fn()
-        shutil.rmtree('logs', ignore_errors=True)
+        #shutil.rmtree('logs', ignore_errors=True)
         return res
     return wrapped
 

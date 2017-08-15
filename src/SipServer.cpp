@@ -113,7 +113,7 @@ void SipServer::run() {
         char buff[1024] = {0};
         //Amount of received bytes
         size_t bytesReceived = serverSocket->receive_from(asio::buffer(buff), clientEndPoint);
-        LOG(INFO) << bytesReceived << " bytes received ";
+        LOG(INFO) << bytesReceived << " bytes received: ";
         LOG(INFO) << clientEndPoint.address() << ":"
                   << clientEndPoint.port() << "< "
                   << buff;
@@ -122,18 +122,18 @@ void SipServer::run() {
         if (std::find(clients.begin(), clients.end(), clientEndPoint) == clients.end()) {
             clients.push_back(clientEndPoint);
             std::cout << "Client was added: " << clientEndPoint.address() << ":" << clientEndPoint.port() << std::endl;
-            LOG(INFO) << "Client was added: " << clientEndPoint.address() << ":" << clientEndPoint.port() << std::endl;
+            LOG(INFO) << "Client was added: " << clientEndPoint.address() << ":" << clientEndPoint.port();
         }
 
         if (bytesReceived != 0) {
             size_t bytesSent = serverSocket->send_to(asio::buffer(buff), clientEndPoint);
-            LOG(INFO) << bytesSent << " bytes sent ";
+            LOG(INFO) << bytesSent << " bytes sent: ";
 
             std::cout << clientEndPoint.address() << ":"
-                      << clientEndPoint.port() << "< "
+                      << clientEndPoint.port() << "> "
                       << buff << std::endl;
             LOG(INFO) << clientEndPoint.address() << ":"
-                      << clientEndPoint.port() << "< "
+                      << clientEndPoint.port() << "> "
                       << buff;
 
             if (std::string(buff) == "q") {

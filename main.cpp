@@ -28,7 +28,7 @@ int main(int argc, const char* argv[]) {
     el::Loggers::addFlag(el::LoggingFlag::HierarchicalLogging);
     el::Loggers::setLoggingLevel(logLevel);
 
-    LOG(INFO) << "\nLogger of SipServer is started";
+    LOG(INFO) << "Logger of SipServer is started";
     LOG(INFO) << "Log level is " << (uint)logLevel;
     LOG(INFO) << "Echo to stdout is " << (isConsoleOut? "" : "not") << " specified";
 
