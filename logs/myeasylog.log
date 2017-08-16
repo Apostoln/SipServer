@@ -1,3 +1,8 @@
 INFO 14:48:04: Sip server is started
 ERROR 14:48:04: Test
 INFO 10:05:23 [main.cpp]: Logger of SipServer is started
+INFO 20:53:32 [main.cpp]: Logger of SipServer is started
+INFO 20:53:32 [main.cpp]: Log level is 128
+INFO 20:53:32 [main.cpp]: Echo to stdout is not specified
+INFO 20:53:32 [SipServer.cpp]: Server is started
+INFO 20:53:32 [SipServer.cpp]: Listening UDP port 42424

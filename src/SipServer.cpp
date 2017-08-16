@@ -93,6 +93,11 @@ void SipServer::updateSocket() {
                     errorCode = 1;
                 }
                 break;
+            case 98:
+                std::cerr << "Port is unavailable" << std::endl;
+                LOG(ERROR) << "Port is unavailable";
+                errorCode = 1;
+                break;
             case 99:
                 std::cerr << "Network interface is not supported: " << networkInterface.to_string() << std::endl;
                 LOG(ERROR) << "Network interface is not supported: " << networkInterface.to_string();
