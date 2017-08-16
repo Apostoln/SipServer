@@ -4,7 +4,7 @@ project(SipServer)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
 set(CMAKE_CXX_STANDARD 14)
-set(GCC_COVERAGE_COMPILE_FLAGS "-DASIO_STANDALONE -pthread")
+set(GCC_COVERAGE_COMPILE_FLAGS "-DASIO_STANDALONE -pthread ")
 
 add_library(argparse INTERFACE )
 target_include_directories(argparse INTERFACE lib/argparse )

@@ -19,14 +19,14 @@ serverEndPoint = config.serverEndPoint
 TIMEOUT_LIMIT = 5
 TEST_MESSAGES = ['Hello', 'World', 'q']
 ERROR_MSG_PATTERN = re.compile(R"Exit with error code (?P<errorCode>\d+)")
-
+LOGGER_PATH = config.LOGGER_PATH
 
 def checkReturnCode(clientSocket, correctCode):
     for m in TEST_MESSAGES:
         logging.debug(f'< {m}')
         clientSocket.sendto(m.encode(), serverEndPoint)
 
-    logFile = open('./logs/myeasylog.log')
+    logFile = open(LOGGER_PATH)
 
     reason = None
     if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
@@ -54,7 +54,7 @@ def checkMessageInLog(isInput):
         logging.debug(f'< {m}')
         clientSocket.sendto(m.encode(), serverEndPoint)
 
-    logFile = open('./logs/myeasylog.log')
+    logFile = open(LOGGER_PATH)
 
     reason = None
     if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
@@ -72,6 +72,8 @@ def checkMessageInLog(isInput):
 
 def process(command, multiConnection=False):
     result = []
+    command.append('-f')
+    command.append(LOGGER_PATH)
     commandResult = subprocess.Popen(command)
     result.append(commandResult)
 

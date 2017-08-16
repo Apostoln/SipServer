@@ -8,6 +8,9 @@ import shutil
 
 from config import Config
 config = Config()
+LOGGER_PATH = config.LOGGER_PATH
+LOG_DIR = LOGGER_PATH.split('/')[0]
+LOG_DIR = LOG_DIR if LOG_DIR else '.'
 
 
 def freePort():
@@ -55,7 +58,7 @@ def handleLogDir(fn):
     @functools.wraps(fn)
     def wrapped():
         res = fn()
-        shutil.rmtree('logs', ignore_errors=True)
+        shutil.rmtree(LOG_DIR, ignore_errors=True)
         return res
     return wrapped
 
