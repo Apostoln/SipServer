@@ -40,13 +40,34 @@ def checkReturnCode(clientSocket, correctCode):
     if not matches:
         reason = 'There are no messages about error code in log'
         return False, reason
-        correctCode = 1
     returnCode = int(matches[0])
     isReturnCodeCorrect = returnCode == correctCode
     if not isReturnCodeCorrect:
         reason = f'Error code is incorrect. Must be {correctCode}, now {returnCode}'
     return isReturnCodeCorrect, reason
 
+def checkMessageInLog(isInput):
+    sign = '>' if input else '<'
+    result, clientSocket = process([path, '-p', port, '-l', 'INFO'])
+
+    for m in TEST_MESSAGES:
+        logging.debug(f'< {m}')
+        clientSocket.sendto(m.encode(), serverEndPoint)
+
+    logFile = open('./logs/myeasylog.log')
+
+    reason = None
+    if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
+        for line in logFile:
+            logging.debug(f'log: {line[:-1]}')
+
+    logFile.seek(0)
+    logFileString = logFile.read()
+    isAllMessagedLogged = all(re.findall(f'.+ {sign} {msg}', logFileString) for msg in TEST_MESSAGES)
+
+    if not isAllMessagedLogged:
+        reason = 'Not all input messaged are logged'
+    return isAllMessagedLogged, reason
 
 
 def process(command, multiConnection=False):
@@ -70,48 +91,14 @@ def process(command, multiConnection=False):
 @printName
 @timeout(TIMEOUT_LIMIT)
 def inMessageInLog():
-    result, clientSocket = process([path, '-p', port, '-l', 'INFO'])
-
-    for m in TEST_MESSAGES:
-        logging.debug(f'< {m}')
-        clientSocket.sendto(m.encode(), serverEndPoint)
-
-    logFile = open('./logs/myeasylog.log')
-
-    reason = None
-    if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
-        for line in logFile:
-            logging.debug(f'log: {line[:-1]}')
-
-    logFile.seek(0)
-    isAllMessagedLogged = all(any(line.find(x) != -1 for line in logFile) for x in TEST_MESSAGES)
-    if not isAllMessagedLogged:
-        reason = 'Not all input messaged are logged'
-    return isAllMessagedLogged, reason
+    return checkMessageInLog(isInput=True)
 
 
 @handleLogDir
 @printName
 @timeout(TIMEOUT_LIMIT)
 def outMessageInLog():
-    result, clientSocket = process([path, '-p', port, '-l', 'INFO'])
-
-    for m in TEST_MESSAGES:
-        logging.debug(f'< {m}')
-        clientSocket.sendto(m.encode(), serverEndPoint)
-
-    logFile = open('./logs/myeasylog.log')
-
-    reason = None
-    if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
-        for line in logFile:
-            logging.debug(f'log: {line[:-1]}')
-
-    logFile.seek(0)
-    isAllMessagedLogged = all(any(line.find(x) != -1 for line in logFile) for x in TEST_MESSAGES)
-    if not isAllMessagedLogged:
-        reason = 'Not all output messaged are logged'
-    return isAllMessagedLogged, reason
+    return checkMessageInLog(isInput=False)
 
 
 @handleLogDir
@@ -148,5 +135,4 @@ def unavailableInterfaceLog():
     result, clientSocket = process([path, '-n', '1.2.3.4', '-l', 'DEBUG', '-c', '1'])
     return checkReturnCode(clientSocket, correctCode=3)
 
-#tests = [inMessageInLog, outMessageInLog]
-tests = [usedPortInLog, unavailablePortInLog, unavailableInterfaceLog]
+tests = [inMessageInLog, outMessageInLog, usedPortInLog, unavailablePortInLog, unavailableInterfaceLog]

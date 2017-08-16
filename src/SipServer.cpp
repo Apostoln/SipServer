@@ -127,7 +127,7 @@ void SipServer::run() {
         size_t bytesReceived = serverSocket->receive_from(asio::buffer(buff), clientEndPoint);
         LOG(INFO) << bytesReceived << " bytes received: ";
         LOG(INFO) << clientEndPoint.address() << ":"
-                  << clientEndPoint.port() << "< "
+                  << clientEndPoint.port() << " > "
                   << buff;
 
         //Add new connection if it is not exist
@@ -142,10 +142,10 @@ void SipServer::run() {
             LOG(INFO) << bytesSent << " bytes sent: ";
 
             std::cout << clientEndPoint.address() << ":"
-                      << clientEndPoint.port() << "> "
+                      << clientEndPoint.port() << " < "
                       << buff << std::endl;
             LOG(INFO) << clientEndPoint.address() << ":"
-                      << clientEndPoint.port() << "> "
+                      << clientEndPoint.port() << " < "
                       << buff;
 
             if (std::string(buff) == "q") {
