@@ -8,7 +8,7 @@ from utils import freePort
 from config import Config
 
 LOCALHOST = '127.0.0.1'
-
+TEST_AMOUNT = 3
 
 def test(testFunction):
     resultTest, reason = testFunction()
@@ -54,6 +54,7 @@ if __name__ == '__main__':
 
     testflow = None
     testflownumber = 0
+    rangeErrorMsg = f'--testflow argument must be integer in range [1,{TEST_AMOUNT}]'
     try:
         testflownumber = int(args.testflow)
     except ValueError:
@@ -66,6 +67,9 @@ if __name__ == '__main__':
     elif testflownumber == 2:
         import testflow2
         testflow = testflow2.tests
+    elif testflownumber == 3:
+        import testflow3
+        testflow = testflow3.tests
     else:
         print('--testflow argument must be integer in range [1,2]')
         exit(1)

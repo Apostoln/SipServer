@@ -137,6 +137,7 @@ void SipServer::run() {
         if (bytesReceived != 0) {
             SipMessage incomingMessage = SipParser::parse(buff);
             auto outgoingMessage = formOutgoingMessage(incomingMessage);
+
             size_t bytesSent = serverSocket->send_to(asio::buffer(static_cast<std::string>(outgoingMessage)),
                                                      clientEndPoint);
             LOG(INFO) << bytesSent << " bytes sent: ";

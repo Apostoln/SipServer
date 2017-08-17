@@ -4,9 +4,6 @@ import time
 import platform
 import logging
 import re
-import logging
-import subprocess
-import time
 
 from config import Config
 from utils import timeout, printName, handleLogDir

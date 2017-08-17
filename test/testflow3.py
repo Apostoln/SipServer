@@ -1,3 +1,19 @@
+import socket
+import subprocess
+import time
+import platform
+import logging
+import re
+
+from utils import printName, timeout
+from config import Config
+config = Config()
+address = config.address
+port = config.port
+path = config.path
+interface = config.interface
+serverEndPoint = config.serverEndPoint
+
 TIMEOUT_LIMIT = 10
 TEST_SIP_REQUEST = R"""INVITE sip:nikolia@example.com SIP/2.0
 Record-Route: <sip:nikolia@10.0.0.10;lr>
@@ -30,8 +46,6 @@ a=sendrecv"""
 
 def process(command, multiConnection=False):
     result = []
-    command.append('-f')
-    command.append(LOGGER_PATH)
     commandResult = subprocess.Popen(command)
     result.append(commandResult)
 
@@ -42,6 +56,7 @@ def process(command, multiConnection=False):
         amountClients = 3
         sockets = [socket.socket(socket.AF_INET, socket.SOCK_DGRAM) for _ in range(amountClients)]
         result.append(sockets)
+
 
     time.sleep(0.1)
     return tuple(result)
@@ -70,9 +85,23 @@ def requestParsing():
         for d in data.split('\n'):
             logging.debug(f'> {d}')
 
+    reason = ''
+    headersLine = None
+    valuesLine = None
+    try:
+        try:
+            headersLine = [d for d in data.split('\n') if d.find('Headers') != -1][0]
+        except Exception as e:
+            reason = 'There are no "Headers" header'
+            raise e
 
-    headersLine = [d for d in data.split('\n') if d.find('Headers') != -1][0]
-    valuesLine = [d for d in data.split('\n') if d.find('Values') != -1][0]
+        try:
+            valuesLine = [d for d in data.split('\n') if d.find('Values') != -1][0]
+        except Exception as e:
+            reason = 'There are no "Values" header'
+            raise e
+    except Exception as e:
+        return False, reason
 
     headersFlag = all(headersLine.find(h) != -1 for h in headers)
     valuesFlag = all(valuesLine.find(v) != -1 for v in values)
@@ -85,6 +114,4 @@ def requestParsing():
 
     return headersFlag and valuesFlag, reason
 
-
-
-tests = [requestParsing, ]
+tests = [requestParsing]

@@ -39,7 +39,6 @@ class SipServer {
             std::string valuesHeader = streamForValues.str();
             valuesHeader.pop_back(); //remove extra comma
             incomingMessage.headers.insert(std::make_pair("Values",valuesHeader));
-
             return incomingMessage;
         }
 
