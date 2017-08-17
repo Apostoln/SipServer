@@ -5,7 +5,7 @@ import platform
 import logging
 import re
 
-from utils import printName, timeout
+from utils import printName, timeout, handleLogDir
 from config import Config
 config = Config()
 address = config.address
@@ -61,6 +61,7 @@ def process(command, multiConnection=False):
     time.sleep(0.1)
     return tuple(result)
 
+@handleLogDir
 @printName
 @timeout(TIMEOUT_LIMIT)
 def requestParsing():
@@ -112,6 +113,11 @@ def requestParsing():
     if not valuesFlag:
         reason += "Not all values are present in Values header"
 
-    return headersFlag and valuesFlag, reason
+
+    returncode = result.poll()
+    isFinishSuccessfully = not bool(returncode)
+    if not isFinishSuccessfully:
+        reason = f"Return code is {returncode}"
+    return isFinishSuccessfully and headersFlag and valuesFlag , reason
 
 tests = [requestParsing]
