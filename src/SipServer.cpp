@@ -122,6 +122,10 @@ void SipServer::run() {
         char buff[4096] = {0};
         //Amount of received bytes
         size_t bytesReceived = serverSocket->receive_from(asio::buffer(buff), clientEndPoint);
+        std::cout << bytesReceived << " bytes received: " << std::endl;
+        std::cout << clientEndPoint.address() << ":"
+                  << clientEndPoint.port() << " > "
+                  << buff << std::endl;
         LOG(INFO) << bytesReceived << " bytes received: ";
         LOG(INFO) << clientEndPoint.address() << ":"
                   << clientEndPoint.port() << " > "
@@ -140,14 +144,16 @@ void SipServer::run() {
 
             size_t bytesSent = serverSocket->send_to(asio::buffer(static_cast<std::string>(outgoingMessage)),
                                                      clientEndPoint);
+
+            std::cout << bytesSent << " bytes sent: " << std::endl;
             LOG(INFO) << bytesSent << " bytes sent: ";
 
             std::cout << clientEndPoint.address() << ":"
                       << clientEndPoint.port() << " < "
-                      << buff << std::endl;
+                      << static_cast<std::string>(outgoingMessage) << std::endl;
             LOG(INFO) << clientEndPoint.address() << ":"
                       << clientEndPoint.port() << " < "
-                      << buff;
+                      << static_cast<std::string>(outgoingMessage);
 
             if (std::string(buff) == "q") {
                 //Remove closed connection from vector

@@ -1,7 +1,6 @@
 import socket
 import subprocess
 import time
-import platform
 import logging
 import re
 
@@ -14,7 +13,7 @@ path = config.path
 interface = config.interface
 serverEndPoint = config.serverEndPoint
 
-TIMEOUT_LIMIT = 10
+TIMEOUT_LIMIT = 5
 TEST_SIP_REQUEST = R"""INVITE sip:nikolia@example.com SIP/2.0
 Record-Route: <sip:nikolia@10.0.0.10;lr>
 Via: SIP/2.0/UDP 10.0.0.10;branch=z9hG4bK3af7.0a6e92f4.0
@@ -43,6 +42,8 @@ a=rtpmap:101 telephone-event/8000
 a=fmtp:101 0-16
 a=silenceSupp:off - - - -
 a=sendrecv"""
+
+
 
 def process(command, multiConnection=False):
     result = []
@@ -120,4 +121,47 @@ def requestParsing():
         reason = f"Return code is {returncode}"
     return isFinishSuccessfully and headersFlag and valuesFlag , reason
 
-tests = [requestParsing]
+@handleLogDir
+@printName
+@timeout(TIMEOUT_LIMIT)
+def checkDuplicate():
+    startString = "INVITE sip:881097237208471@193.28.87.167:5071 SIP/2.0"
+    vias = ["SIP/2.0/UDP 193.28.87.25:5070;branch=z9hG4bK-524287-1---e084537b0deb2167;rport",
+	        "SIP/ 2.0/UDP 193.28.87.25:5060;branch=z9hG4bK-524287-1---b1a1a193c9c5fddcf4d16374cbdf3c16;rport=5060",
+	        "SIP/2.0/UDP 123.26.58.221:5060;branch=z9hG4bKfe06f452-2dd6-db11-6d02-oNTGqCemAwHC;rport=19049;received=93.115.26.218"]
+    message = startString + '\nVia: ' + '\nVia: '.join(vias) + '\n\nv=0'
+
+    result, clientSocket = process([path, '-p', '0', '-l', 'DEBUG', '-c', '1'])
+    clientSocket.sendto(message.encode(), serverEndPoint)
+
+    logging.debug('Send:')
+    for line in message.split('\n'):
+        logging.debug(f'<{line}')
+
+    data = clientSocket.recv(4096).decode()
+    time.sleep(1)
+    if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
+        for d in data.split('\n'):
+            logging.debug(f'> {d}')
+
+    values = [d for d in data.split('\n') if d.find('Values') != -1][0]
+    isDuplicatesInValideOrder =  values.split(':',maxsplit=1)[-1].find(','.join(vias)) != -1 #killmeplease
+    print(','.join(vias))
+    print(values.split(':',maxsplit=1)[-1])
+    reason = None
+    if not isDuplicatesInValideOrder:
+        reason = "Order is incorrect"
+    return isDuplicatesInValideOrder, reason
+
+def validationHeader1():
+    #will be done later
+    #TODO: impl
+    pass
+
+def validationHeader2():
+    # will be done later
+    # TODO: impl
+    pass
+
+
+tests = [requestParsing, checkDuplicate]
