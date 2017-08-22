@@ -116,6 +116,8 @@ def requestParsing():
 
 
     returncode = result.poll()
+    result.kill()
+
     isFinishSuccessfully = not bool(returncode)
     if not isFinishSuccessfully:
         reason = f"Return code is {returncode}"
@@ -131,7 +133,7 @@ def checkDuplicate():
 	        "SIP/2.0/UDP 123.26.58.221:5060;branch=z9hG4bKfe06f452-2dd6-db11-6d02-oNTGqCemAwHC;rport=19049;received=93.115.26.218"]
     message = startString + '\nVia: ' + '\nVia: '.join(vias) + '\n\nv=0'
 
-    result, clientSocket = process([path, '-p', '0', '-l', 'DEBUG', '-c', '1'])
+    result, clientSocket = process([path, '-p', port, '-l', 'DEBUG', '-c', '1'])
     clientSocket.sendto(message.encode(), serverEndPoint)
 
     logging.debug('Send:')
@@ -139,10 +141,12 @@ def checkDuplicate():
         logging.debug(f'<{line}')
 
     data = clientSocket.recv(4096).decode()
-    time.sleep(1)
+
     if logging.getLogger().getEffectiveLevel() == logging.DEBUG:
         for d in data.split('\n'):
             logging.debug(f'> {d}')
+
+    result.kill()
 
     values = [d for d in data.split('\n') if d.find('Values') != -1][0]
     isDuplicatesInValideOrder =  values.split(':',maxsplit=1)[-1].find(','.join(vias)) != -1 #killmeplease
@@ -157,11 +161,12 @@ def checkDuplicate():
 @timeout(TIMEOUT_LIMIT)
 def parsingError():
     message = "foobar"
-    result, clientSocket = process([path, '-p', '0', '-l', 'DEBUG', '-c', '1'])
+
+    result, clientSocket = process([path, '-p', port, '-l', 'DEBUG', '-c', '1'])
     clientSocket.sendto(message.encode(), serverEndPoint)
     logging.debug(f'<{message}')
-    time.sleep(2)
-    returncode = result.poll()
+    returncode = result.wait()
+
     correctReturnCode = 5
     isReturnCodeCorrect = correctReturnCode == returncode
     reason = None
@@ -180,4 +185,4 @@ def validationHeader2():
     pass
 
 
-tests = [parsingError]
+tests = [requestParsing, checkDuplicate, parsingError]

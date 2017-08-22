@@ -119,12 +119,9 @@ void SipServer::run() {
     LOG(INFO) << "Listening UDP port " << this->getPort();
 
     while(true) {
-        std::cout << "Here" << std::endl;
         char buff[4096] = {0};
         //Amount of received bytes
-        std::cout << "Here2" << std::endl;
         size_t bytesReceived = serverSocket->receive_from(asio::buffer(buff), clientEndPoint);
-        std::cout << "Here3" << std::endl;
         std::cout << bytesReceived << " bytes received: " << std::endl;
         std::cout << clientEndPoint.address() << ":"
                   << clientEndPoint.port() << " > "
@@ -142,7 +139,6 @@ void SipServer::run() {
         }
 
         if (bytesReceived != 0) {
-            std::cout << "Hop!" << std::endl;
             try {
                 SipMessage incomingMessage = SipParser::parse(buff);
                 auto outgoingMessage = formOutgoingMessage(incomingMessage);
