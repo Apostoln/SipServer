@@ -3,7 +3,9 @@
 
 #include <SipServer.hpp>
 #include <Builder.hpp>
+
 #include <ExitException.hpp>
+#include <Registrar.hpp>
 #include <utils.hpp>
 
 INITIALIZE_EASYLOGGINGPP //crutch for logger
@@ -20,6 +22,9 @@ int main(int argc, const char* argv[]) {
     parser.addArgument("-c", "--cout", 1);
     parser.addArgument("-f", "--fileLogger", 1);
     parser.parse(argc, argv);
+
+
+    Registrar registrar("../etc/accounts.csv");
 
     auto portArg = parser.retrieve<std::string>("port");
     auto networkInterfaceArg = parser.retrieve<std::string>("networkInterface");
