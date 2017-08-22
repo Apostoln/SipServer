@@ -3,6 +3,7 @@
 #define SIPSERVER_BUILDER_HPP
 
 #include <SipServer.hpp>
+#include <Registrar.hpp>
 
 class SipServer::Builder {
     private:
@@ -14,6 +15,7 @@ class SipServer::Builder {
         Builder port(unsigned short port);
         Builder networkInterface(asio::ip::address networkInterface);
         Builder networkInterface(const char* string);
+        Builder registrar(Registrar* registrar);
         SipServer build();
 };
 

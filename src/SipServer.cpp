@@ -11,6 +11,7 @@ using namespace std::string_literals;
 #include <SipServer.hpp>
 #include <ExitException.hpp>
 #include <ErrorCode.hpp>
+#include <Registrar.hpp>
 
 SipMessage SipServer::formOutgoingMessage(SipMessage incomingMessage) {
     std::vector<std::string> headers;
@@ -41,15 +42,17 @@ SipMessage SipServer::formOutgoingMessage(SipMessage incomingMessage) {
 SipServer::SipServer():
     serverIo(new asio::io_service()),
     networkInterface(asio::ip::address()),
-    port(0)
+    port(0),
+    registrar(nullptr)
 {
     LOG(DEBUG) << "Constructor SipServer() is called";
 }
 
-SipServer::SipServer(asio::io_service* ioService, asio::ip::address networkInterface, unsigned short port):
+SipServer::SipServer(asio::io_service* ioService, asio::ip::address networkInterface, unsigned short port, Registrar* registrar):
     serverIo(ioService),
     networkInterface(networkInterface),
-    port(port)
+    port(port),
+    registrar(registrar)
 {
     LOG(DEBUG) << "Constructor SipServer(asio::io_service*, asio::ip::address, unsigned short) is called";
 }

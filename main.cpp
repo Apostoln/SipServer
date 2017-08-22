@@ -21,16 +21,18 @@ int main(int argc, const char* argv[]) {
     parser.addArgument("-l", "--logLevel", 1);
     parser.addArgument("-c", "--cout", 1);
     parser.addArgument("-f", "--fileLogger", 1);
+    parser.addArgument("-a", "--accounts", 1);
     parser.parse(argc, argv);
-
-
-    Registrar registrar("../etc/accounts.csv");
 
     auto portArg = parser.retrieve<std::string>("port");
     auto networkInterfaceArg = parser.retrieve<std::string>("networkInterface");
     auto logLevel = getLogLevel(parser.retrieve<std::string>("logLevel"));
     logLevel = logLevel == el::Level::Unknown? defaultLogLevel : logLevel;
-    bool isConsoleOut = !parser.retrieve<std::string>("cout").empty() ;
+    bool isConsoleOut = !parser.retrieve<std::string>("cout").empty();
+    auto pathToAccounts = parser.retrieve<std::string>("accounts");
+
+    Registrar* registrar = new Registrar(pathToAccounts);
+
     auto loggingFile = parser.retrieve<std::string>("fileLogger");
     loggingFile = loggingFile != ""? loggingFile: defaultLogFilePath;
     LOG_IF(loggingFile == defaultLogFilePath, DEBUG) << "Default path to log file is used";
@@ -46,6 +48,7 @@ int main(int argc, const char* argv[]) {
         auto networkInterface = networkInterfaceArg.c_str();
         sipServerBuilder.networkInterface(networkInterface);
     }
+
     try {
         SipServer server = sipServerBuilder.build();
         server.run();
@@ -62,5 +65,6 @@ int main(int argc, const char* argv[]) {
         LOG(ERROR) << "Exit with error code " << errorCodeNum;
         return errorCodeNum;
     }
+
     return 0;
 }

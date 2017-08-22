@@ -11,6 +11,10 @@ Registrar::Registrar(std::string&& source):
             load();
 }
 
+Registrar::Registrar(const Registrar& other):
+    source(source), accounts(accounts)
+{}
+
 void Registrar::load() {
     accounts.clear(); //clear if non-empty
     std::fstream fin(source);
@@ -31,4 +35,12 @@ void Registrar::load() {
 
 std::unordered_map<std::string, std::string> Registrar::getAccount() {
     return accounts;
+}
+
+Registrar Registrar::operator=(Registrar& other)  {
+    if(this == &other)
+        return *this;
+    source = other.source;
+    accounts = other.accounts;
+    return *this;
 }

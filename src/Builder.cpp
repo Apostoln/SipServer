@@ -28,6 +28,11 @@ Builder Builder::networkInterface(const char *string) {
     return *this;
 }
 
+Builder Builder::registrar(Registrar* registrar) {
+    sipServer->registrar = registrar;
+    return *this;
+}
+
 SipServer Builder::build() {
     sipServer->init();
     return *sipServer;

@@ -7,6 +7,7 @@
 #include <asio/io_service.hpp>
 #include <asio/ip/udp.hpp>
 
+#include <Registrar.hpp>
 #include <SipMessage.hpp>
 
 class SipServer {
@@ -16,6 +17,7 @@ class SipServer {
         unsigned short port;
         asio::ip::address networkInterface;
         std::vector<asio::ip::udp::endpoint> clients;
+        Registrar* registrar;
 
         void setPort(unsigned short port);
         void setServerIo(asio::io_service* serverIo);
@@ -28,7 +30,7 @@ class SipServer {
         class Builder;
 
         SipServer();
-        SipServer(asio::io_service* ioService, asio::ip::address networkInterface, unsigned short port);
+        SipServer(asio::io_service* ioService, asio::ip::address networkInterface, unsigned short port, Registrar* registrar);
         ~SipServer();
         void init();
         void updateSocket();
