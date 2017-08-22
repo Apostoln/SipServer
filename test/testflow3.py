@@ -146,12 +146,28 @@ def checkDuplicate():
 
     values = [d for d in data.split('\n') if d.find('Values') != -1][0]
     isDuplicatesInValideOrder =  values.split(':',maxsplit=1)[-1].find(','.join(vias)) != -1 #killmeplease
-    print(','.join(vias))
-    print(values.split(':',maxsplit=1)[-1])
     reason = None
     if not isDuplicatesInValideOrder:
         reason = "Order is incorrect"
     return isDuplicatesInValideOrder, reason
+
+
+@handleLogDir
+@printName
+@timeout(TIMEOUT_LIMIT)
+def parsingError():
+    message = "foobar"
+    result, clientSocket = process([path, '-p', '0', '-l', 'DEBUG', '-c', '1'])
+    clientSocket.sendto(message.encode(), serverEndPoint)
+    logging.debug(f'<{message}')
+    time.sleep(2)
+    returncode = result.poll()
+    correctReturnCode = 5
+    isReturnCodeCorrect = correctReturnCode == returncode
+    reason = None
+    if not isReturnCodeCorrect:
+        reason = f"Return code is incorrect. Must be {correctReturnCode}, now {returncode}"
+    return isReturnCodeCorrect, reason
 
 def validationHeader1():
     #will be done later
@@ -164,4 +180,4 @@ def validationHeader2():
     pass
 
 
-tests = [requestParsing, checkDuplicate]
+tests = [parsingError]

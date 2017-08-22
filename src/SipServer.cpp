@@ -119,9 +119,12 @@ void SipServer::run() {
     LOG(INFO) << "Listening UDP port " << this->getPort();
 
     while(true) {
+        std::cout << "Here" << std::endl;
         char buff[4096] = {0};
         //Amount of received bytes
+        std::cout << "Here2" << std::endl;
         size_t bytesReceived = serverSocket->receive_from(asio::buffer(buff), clientEndPoint);
+        std::cout << "Here3" << std::endl;
         std::cout << bytesReceived << " bytes received: " << std::endl;
         std::cout << clientEndPoint.address() << ":"
                   << clientEndPoint.port() << " > "
@@ -139,25 +142,33 @@ void SipServer::run() {
         }
 
         if (bytesReceived != 0) {
-            SipMessage incomingMessage = SipParser::parse(buff);
-            auto outgoingMessage = formOutgoingMessage(incomingMessage);
+            std::cout << "Hop!" << std::endl;
+            try {
+                SipMessage incomingMessage = SipParser::parse(buff);
+                auto outgoingMessage = formOutgoingMessage(incomingMessage);
 
-            size_t bytesSent = serverSocket->send_to(asio::buffer(static_cast<std::string>(outgoingMessage)),
-                                                     clientEndPoint);
+                size_t bytesSent = serverSocket->send_to(asio::buffer(static_cast<std::string>(outgoingMessage)),
+                                                         clientEndPoint);
 
-            std::cout << bytesSent << " bytes sent: " << std::endl;
-            LOG(INFO) << bytesSent << " bytes sent: ";
+                std::cout << bytesSent << " bytes sent: " << std::endl;
+                LOG(INFO) << bytesSent << " bytes sent: ";
 
-            std::cout << clientEndPoint.address() << ":"
-                      << clientEndPoint.port() << " < "
-                      << static_cast<std::string>(outgoingMessage) << std::endl;
-            LOG(INFO) << clientEndPoint.address() << ":"
-                      << clientEndPoint.port() << " < "
-                      << static_cast<std::string>(outgoingMessage);
+                std::cout << clientEndPoint.address() << ":"
+                          << clientEndPoint.port() << " < "
+                          << static_cast<std::string>(outgoingMessage) << std::endl;
+                LOG(INFO) << clientEndPoint.address() << ":"
+                          << clientEndPoint.port() << " < "
+                          << static_cast<std::string>(outgoingMessage);
 
-            if (std::string(buff) == "q") {
-                //Remove closed connection from vector
-                removeClient(clientEndPoint);
+                if (std::string(buff) == "q") {
+                    //Remove closed connection from vector
+                    removeClient(clientEndPoint);
+                }
+            }
+            catch(std::logic_error& e) {
+                std::cerr << e.what() << std::endl;
+                LOG(ERROR) << e.what();
+                exit(5);
             }
         }
     }

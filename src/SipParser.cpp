@@ -35,7 +35,6 @@ SipMessage SipParser::parse(const char* raw) {
         std::getline(line, value);
 
         value.erase(0, value.find_first_not_of(' '));       //prefixing spaces
-        //str.erase(str.find_last_not_of(' ')+1);         //surfixing spaces
 
         result.headers.insert(std::make_pair(key,value));
     }
