@@ -2,10 +2,12 @@
 
 #include <iostream>
 #include <algorithm>
+#include <type_traits>
 
 #include <easylogging++.h>
 
 #include <SipServer.hpp>
+#include <ExitException.hpp>
 #include <ErrorCode.hpp>
 
 SipServer::SipServer():
@@ -109,8 +111,8 @@ void SipServer::updateSocket() {
                 LOG(ERROR) << "Unknown asio error";
                 errorCode = ErrorCode::UNKNOWN;
         }
-        LOG(DEBUG) << "Exit with error code " << errorCode;
-        exit(errorCode);
+        LOG(DEBUG) << "Throwing ExitException with error code " << static_cast<std::underlying_type<ErrorCode >::type>(errorCode);
+        throw ExitException(errorCode);
     }
 }
 
@@ -168,7 +170,7 @@ void SipServer::removeClient(asio::ip::udp::endpoint& client) {
         std::cout << "There are no connections now, server is closed" << std::endl;
         LOG(INFO) << "There are no connections now, server is closed";
         serverSocket->close();
-        exit(0);
+        throw ExitException(ErrorCode::SUCCESSFULLY);
     }
 }
 

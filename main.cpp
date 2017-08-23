@@ -6,6 +6,7 @@
 
 #include <SipServer.hpp>
 #include <Builder.hpp>
+#include <ExitException.hpp>
 #include <utils.hpp>
 
 INITIALIZE_EASYLOGGINGPP //crutch for logger
@@ -57,8 +58,14 @@ int main(int argc, const char* argv[]) {
         auto networkInterface = networkInterfaceArg.c_str();
         sipServerBuilder.networkInterface(networkInterface);
     }
-
-    SipServer server = sipServerBuilder.build();
-    server.run();
+    try {
+        SipServer server = sipServerBuilder.build();
+        server.run();
+    }
+    catch (ExitException& e) {
+        auto errorCodeNum = static_cast<std::underlying_type<ErrorCode >::type>(e.getErrorCode());
+        LOG(ERROR) << "Exit with error code " << errorCodeNum;
+        return errorCodeNum;
+    }
     return 0;
 }
