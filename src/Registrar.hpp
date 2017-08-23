@@ -21,7 +21,9 @@ class Registrar {
         Registrar(std::string& source);
         Registrar(std::string&& source);
         Registrar(const Registrar &other);
-        void load();
+        ~Registrar();
+        void download();
+        void upload();
         std::vector<SipAccount> getAccounts();
         Registrar operator=(Registrar &other);
 };

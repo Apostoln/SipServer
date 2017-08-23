@@ -6,23 +6,23 @@
 Registrar::Registrar(std::string& source):
     source(source)
 {
-    load();
+    download();
 }
 
 Registrar::Registrar(std::string&& source):
     source(std::move(source))
 {
-    load();
+    download();
 }
 
 Registrar::Registrar(const Registrar& other):
     source(source), accounts(accounts)
 {}
 
-void Registrar::load() {
-    LOG(DEBUG) << "Loading account to registrar from " << this->source;
+void Registrar::download() {
+    LOG(DEBUG) << "Downloading account to registrar from " << this->source;
     accounts.clear(); //clear if non-empty
-    std::fstream fin(source);
+    std::ifstream fin(source);
 
     if(!fin.is_open()) {
         LOG(ERROR) << "Can't open file with accounts. File "
@@ -48,13 +48,30 @@ void Registrar::load() {
         LOG(WARNING) << "Accounts list is empty";
     }
     else {
-        LOG(DEBUG) << "Accounts loaded:";
-        for (auto a: accounts) {
-            LOG(DEBUG) << (std::string) a;
+        LOG(DEBUG) << accounts.size() << " accounts downloaded:";
+        for (auto account: accounts) {
+            LOG(DEBUG) << static_cast<std::string>(account);
         }
     }
 }
 
+void Registrar::upload() {
+    LOG(DEBUG) << "Uploading account to " << this->source << " from registrar";
+
+    //rewrite file
+    std::ofstream fout(source);
+    if(!fout.is_open()) {
+        LOG(ERROR) << "Can't open file with accounts. File "
+                   << this->source << " is damaged or not exist";
+        exit(6);
+    }
+    LOG(DEBUG) << accounts.size() << " accounts uploaded:";
+    for(auto account: accounts) {
+        auto accountString = static_cast<std::string>(account);
+        fout << accountString << std::endl;
+        LOG(DEBUG) << accountString;
+    }
+}
 std::vector<SipAccount> Registrar::getAccounts() {
     return accounts;
 }
@@ -65,4 +82,9 @@ Registrar Registrar::operator=(Registrar& other)  {
     source = other.source;
     accounts = other.accounts;
     return *this;
+}
+
+Registrar::~Registrar() {
+    LOG(DEBUG) << "~Registrar() is called";
+    download();
 }

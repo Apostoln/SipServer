@@ -179,7 +179,6 @@ void SipServer::run() {
 void SipServer::removeClient(asio::ip::udp::endpoint& client) {
     LOG(INFO) << "Connection with " << client.address() << ":" << client.port()
               << " is closed";
-
     clients.erase(std::remove(clients.begin(), clients.end(), client), clients.end());
 }
 
