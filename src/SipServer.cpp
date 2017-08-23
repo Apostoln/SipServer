@@ -166,11 +166,6 @@ void SipServer::run() {
                 LOG(INFO) << clientEndPoint.address() << ":"
                           << clientEndPoint.port() << " < "
                           << static_cast<std::string>(outgoingMessage);
-
-                if (std::string(buff) == "q") {
-                    //Remove closed connection from vector
-                    removeClient(clientEndPoint);
-                }
             }
             catch(std::logic_error& e) {
                 std::cerr << e.what() << std::endl;
@@ -186,11 +181,6 @@ void SipServer::removeClient(asio::ip::udp::endpoint& client) {
               << " is closed";
 
     clients.erase(std::remove(clients.begin(), clients.end(), client), clients.end());
-    if (clients.empty()) {
-        LOG(INFO) << "There are no connections now, server is closed";
-        serverSocket->close();
-        throw ExitException(ErrorCode::SUCCESSFULLY);
-    }
 }
 
 void SipServer::setPort(unsigned short port) {
