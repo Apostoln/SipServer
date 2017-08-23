@@ -13,6 +13,27 @@ using namespace std::string_literals;
 #include <ErrorCode.hpp>
 #include <SipParser.hpp>
 
+SipMessage SipServer::formOutgoingMessage(SipMessage incomingMessage) {
+    std::vector<std::string> headers;
+    std::vector<std::string> values;
+    for(auto i: incomingMessage.headers) {
+        headers.push_back(i.first);
+        values.push_back(i.second);
+    }
+    std::ostringstream streamForHeaders;
+    std::copy(headers.begin(), headers.end(), std::ostream_iterator<std::string>(streamForHeaders,","));
+    std::string headersHeader = streamForHeaders.str();
+    headersHeader.pop_back(); //remove extra comma
+    incomingMessage.headers.insert(std::make_pair("Headers",headersHeader));
+
+    std::ostringstream streamForValues;
+    std::copy(values.begin(), values.end(), std::ostream_iterator<std::string>(streamForValues,","));
+    std::string valuesHeader = streamForValues.str();
+    valuesHeader.pop_back(); //remove extra comma
+    incomingMessage.headers.insert(std::make_pair("Values",valuesHeader));
+    return incomingMessage;
+}
+
 SipServer::SipServer():
     serverIo(new asio::io_service()),
     networkInterface(asio::ip::address()),
