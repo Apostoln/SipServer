@@ -143,10 +143,6 @@ void SipServer::run() {
         char buff[4096] = {0};
         //Amount of received bytes
         size_t bytesReceived = serverSocket->receive_from(asio::buffer(buff), clientEndPoint);
-        std::cout << bytesReceived << " bytes received: " << std::endl;
-        std::cout << clientEndPoint.address() << ":"
-                  << clientEndPoint.port() << " > "
-                  << buff << std::endl;
         LOG(INFO) << bytesReceived << " bytes received: ";
         LOG(INFO) << clientEndPoint.address() << ":"
                   << clientEndPoint.port() << " > "
@@ -155,7 +151,6 @@ void SipServer::run() {
         //Add new connection if it is not exist
         if (std::find(clients.begin(), clients.end(), clientEndPoint) == clients.end()) {
             clients.push_back(clientEndPoint);
-            std::cout << "Client was added: " << clientEndPoint.address() << ":" << clientEndPoint.port() << std::endl;
             LOG(INFO) << "Client was added: " << clientEndPoint.address() << ":" << clientEndPoint.port();
         }
 
@@ -167,12 +162,7 @@ void SipServer::run() {
                 size_t bytesSent = serverSocket->send_to(asio::buffer(static_cast<std::string>(outgoingMessage)),
                                                          clientEndPoint);
 
-                std::cout << bytesSent << " bytes sent: " << std::endl;
                 LOG(INFO) << bytesSent << " bytes sent: ";
-
-                std::cout << clientEndPoint.address() << ":"
-                          << clientEndPoint.port() << " < "
-                          << static_cast<std::string>(outgoingMessage) << std::endl;
                 LOG(INFO) << clientEndPoint.address() << ":"
                           << clientEndPoint.port() << " < "
                           << static_cast<std::string>(outgoingMessage);
@@ -192,14 +182,11 @@ void SipServer::run() {
 }
 
 void SipServer::removeClient(asio::ip::udp::endpoint& client) {
-    std::cout << "Connection with " << client.address() << ":" << client.port()
-              << " is closed" << std::endl;
     LOG(INFO) << "Connection with " << client.address() << ":" << client.port()
               << " is closed";
 
     clients.erase(std::remove(clients.begin(), clients.end(), client), clients.end());
     if (clients.empty()) {
-        std::cout << "There are no connections now, server is closed" << std::endl;
         LOG(INFO) << "There are no connections now, server is closed";
         serverSocket->close();
         throw ExitException(ErrorCode::SUCCESSFULLY);

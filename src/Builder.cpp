@@ -9,7 +9,6 @@ Builder::Builder():
 {}
 
 Builder Builder::ioService(asio::io_service* serverIo) {
-    //this->sipServer->setServerIo(serverIo);
     sipServer->serverIo = serverIo;
     return *this;
 }
