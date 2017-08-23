@@ -23,7 +23,6 @@ class Registrar {
         Registrar(const Registrar &other);
         void load();
         std::vector<SipAccount> getAccounts();
-
         Registrar operator=(Registrar &other);
 };
 

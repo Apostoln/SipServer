@@ -31,13 +31,14 @@ int main(int argc, const char* argv[]) {
     bool isConsoleOut = !parser.retrieve<std::string>("cout").empty();
     auto pathToAccounts = parser.retrieve<std::string>("accounts");
 
-    Registrar* registrar = new Registrar(pathToAccounts);
 
     auto loggingFile = parser.retrieve<std::string>("fileLogger");
     loggingFile = loggingFile != ""? loggingFile: defaultLogFilePath;
     LOG_IF(loggingFile == defaultLogFilePath, DEBUG) << "Default path to log file is used";
 
     configureLogger(isConsoleOut, loggingFile, logLevel);
+
+    Registrar* registrar = new Registrar(pathToAccounts);
 
     SipServer::Builder sipServerBuilder;
     if (!portArg.empty()) {

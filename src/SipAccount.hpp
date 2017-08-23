@@ -24,7 +24,19 @@ struct SipAccount {
         std::string portString = temp;
         auto port = std::stoi(portString);
         this->address = asio::ip::udp::endpoint(ip, port);
+    }
 
+    operator std::string() const {
+        std::string result = "";
+        if(name.empty() && address != asio::ip::udp::endpoint()) {
+            return result;
+        }
+        result += name;
+        result += ",";
+        result += address.address().to_string();
+        result += ":";
+        result += std::to_string(address.port());
+        return result;
     }
 };
 
