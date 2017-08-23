@@ -6,6 +6,7 @@
 #include <easylogging++.h>
 
 #include <SipServer.hpp>
+#include <ErrorCode.hpp>
 
 SipServer::SipServer():
     serverIo(new asio::io_service()),
@@ -79,7 +80,7 @@ void SipServer::updateSocket() {
         std::cerr << "\"" << e.what() << "\"" << std::endl;
         LOG(ERROR) << "Asio error code: "  << e.code();
         LOG(ERROR) << "\"" << e.what() << "\"";
-        int errorCode = 0;
+        ErrorCode errorCode = ErrorCode::SUCCESSFULLY;
         switch (asioErrorCode) {
             case 13:
                 std::cerr << "Port is unavailable" << std::endl;
@@ -87,26 +88,26 @@ void SipServer::updateSocket() {
                 if (port < 1024) {
                     std::cerr << "Port must be > 1024 on Unix, port is " << port << std::endl;
                     LOG(ERROR) << "Port must be > 1024 on Unix, port is " << port;
-                    errorCode = 2;
+                    errorCode = ErrorCode::PORT_SYSTEM;
                 }
                 else {
-                    errorCode = 1;
+                    errorCode = ErrorCode::PORT_UNAVAILABLE;
                 }
                 break;
             case 98:
                 std::cerr << "Port is unavailable" << std::endl;
                 LOG(ERROR) << "Port is unavailable";
-                errorCode = 1;
+                errorCode = ErrorCode::PORT_UNAVAILABLE;
                 break;
             case 99:
                 std::cerr << "Network interface is not supported: " << networkInterface.to_string() << std::endl;
                 LOG(ERROR) << "Network interface is not supported: " << networkInterface.to_string();
-                errorCode = 3;
+                errorCode = ErrorCode::NETWORK_INTERFACE_ERROR;
                 break;
             default:
                 std::cerr << "Unknown asio error" << std::endl;
                 LOG(ERROR) << "Unknown asio error";
-                errorCode = 4;
+                errorCode = ErrorCode::UNKNOWN;
         }
         LOG(DEBUG) << "Exit with error code " << errorCode;
         exit(errorCode);
