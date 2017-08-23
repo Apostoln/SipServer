@@ -9,18 +9,20 @@
 #include <iterator>
 #include <sstream>
 
+#include "SipAccount.hpp"
 
 class Registrar {
     private:
         std::string source;
-        std::unordered_map<std::string, std::string> accounts;
+        std::vector<SipAccount> accounts;
+        //std::unordered_map<std::string, std::string> accounts;
     public:
         Registrar() = default;
         Registrar(std::string& source);
         Registrar(std::string&& source);
         Registrar(const Registrar &other);
         void load();
-        std::unordered_map<std::string, std::string> getAccount();
+        std::vector<SipAccount> getAccounts();
 
         Registrar operator=(Registrar &other);
 };

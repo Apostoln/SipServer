@@ -2,13 +2,15 @@
 #include "Registrar.hpp"
 
 Registrar::Registrar(std::string& source):
-    source(source) {
-            load();
+    source(source)
+{
+    load();
 }
 
 Registrar::Registrar(std::string&& source):
-    source(std::move(source)) {
-            load();
+    source(std::move(source))
+{
+    load();
 }
 
 Registrar::Registrar(const Registrar& other):
@@ -26,14 +28,14 @@ void Registrar::load() {
         std::stringstream stream(i);
         std::string temp;
         std::getline(stream, temp, ','); //split string for ',' delimiter
-        auto name = temp;
+        std::string name = temp;
         std::getline(stream, temp);
-        auto pass = temp;
-        accounts[name] = pass;
+        std::string addressString = temp;
+        accounts.push_back(SipAccount(name, addressString));
     }
 }
 
-std::unordered_map<std::string, std::string> Registrar::getAccount() {
+std::vector<SipAccount> Registrar::getAccounts() {
     return accounts;
 }
 
