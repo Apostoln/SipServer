@@ -3,12 +3,15 @@
 #include <iostream>
 #include <algorithm>
 #include <type_traits>
+#include <string>
+using namespace std::string_literals;
 
 #include <easylogging++.h>
 
 #include <SipServer.hpp>
 #include <ExitException.hpp>
 #include <ErrorCode.hpp>
+#include "ErrorCode.hpp"
 
 SipServer::SipServer():
     serverIo(new asio::io_service()),
@@ -77,42 +80,33 @@ void SipServer::updateSocket() {
     }
     catch (asio::system_error & e) {
         auto asioErrorCode = e.code().value();
-        //TODO:Move error messages to logger
-        std::cerr << "Asio error code: "  << e.code() << std::endl;
-        std::cerr << "\"" << e.what() << "\"" << std::endl;
-        LOG(ERROR) << "Asio error code: "  << e.code();
-        LOG(ERROR) << "\"" << e.what() << "\"";
+        LOG(DEBUG) << "Asio error code: "  << e.code();
+        LOG(DEBUG) << "\"" << e.what() << "\"";
         ErrorCode errorCode = ErrorCode::SUCCESSFULLY;
+        std::string additionalDescription = "";
         switch (asioErrorCode) {
             case 13:
-                std::cerr << "Port is unavailable" << std::endl;
-                LOG(ERROR) << "Port is unavailable";
                 if (port < 1024) {
-                    std::cerr << "Port must be > 1024 on Unix, port is " << port << std::endl;
-                    LOG(ERROR) << "Port must be > 1024 on Unix, port is " << port;
                     errorCode = ErrorCode::PORT_SYSTEM;
                 }
                 else {
                     errorCode = ErrorCode::PORT_UNAVAILABLE;
                 }
+                additionalDescription = "Port is " + std::to_string(port);
                 break;
             case 98:
-                std::cerr << "Port is unavailable" << std::endl;
-                LOG(ERROR) << "Port is unavailable";
                 errorCode = ErrorCode::PORT_UNAVAILABLE;
+                additionalDescription = "Port is " + std::to_string(port);
                 break;
             case 99:
-                std::cerr << "Network interface is not supported: " << networkInterface.to_string() << std::endl;
-                LOG(ERROR) << "Network interface is not supported: " << networkInterface.to_string();
                 errorCode = ErrorCode::NETWORK_INTERFACE_ERROR;
+                additionalDescription = "Network interface is " + networkInterface.to_string();
                 break;
             default:
-                std::cerr << "Unknown asio error" << std::endl;
-                LOG(ERROR) << "Unknown asio error";
-                errorCode = ErrorCode::UNKNOWN;
+                errorCode = ErrorCode::UNKNOWN_ASIO_ERROR;
         }
         LOG(DEBUG) << "Throwing ExitException with error code " << static_cast<std::underlying_type<ErrorCode >::type>(errorCode);
-        throw ExitException(errorCode);
+        throw ExitException(errorCode, additionalDescription);
     }
 }
 

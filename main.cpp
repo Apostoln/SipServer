@@ -63,7 +63,14 @@ int main(int argc, const char* argv[]) {
         server.run();
     }
     catch (ExitException& e) {
+        if (ErrorCode::SUCCESSFULLY == e.getErrorCode()) {
+            LOG(DEBUG) << "SipServer closed successfully";
+            return 0;
+        }
         auto errorCodeNum = static_cast<std::underlying_type<ErrorCode >::type>(e.getErrorCode());
+        auto errorMessage = e.what();
+        std::cerr << errorMessage << std::endl;
+        LOG(ERROR) << errorMessage;
         LOG(ERROR) << "Exit with error code " << errorCodeNum;
         return errorCodeNum;
     }

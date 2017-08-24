@@ -9,7 +9,7 @@ enum class ErrorCode {
     PORT_UNAVAILABLE = 1,
     PORT_SYSTEM = 2,
     NETWORK_INTERFACE_ERROR = 3,
-    UNKNOWN = 4
+    UNKNOWN_ASIO_ERROR = 4
 };
 
 namespace std {
