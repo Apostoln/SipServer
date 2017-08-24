@@ -14,7 +14,11 @@ const char* ExitException::what() {
     messages[ErrorCode::NETWORK_INTERFACE_ERROR] = "Network interface is not supported";
     messages[ErrorCode::UNKNOWN_ASIO_ERROR] = "Unknown asio error";
 
-    std::string errorMessage = messages[errorCode] + ". " + additionalDescription;
+    std::string errorMessage = messages[errorCode];
+    if ("" != additionalDescription) {
+        errorMessage +=  ". " + additionalDescription;
+    }
+
     char* rowStringErrorMessage = new char[errorMessage.length()+1];
     std::strcpy(rowStringErrorMessage, errorMessage.c_str());
     return rowStringErrorMessage;
