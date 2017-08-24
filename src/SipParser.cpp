@@ -1,8 +1,12 @@
 #include <sstream>
 #include <iostream>
-#include "SipParser.hpp"
 
-using namespace std::string_literals;
+#include <easylogging++.h>
+
+#include "SipParser.hpp"
+#include "ErrorCode.hpp"
+#include "ExitException.hpp"
+
 
 SipMessage SipParser::parse(const char* raw) {
     SipMessage result;
@@ -12,7 +16,9 @@ SipMessage SipParser::parse(const char* raw) {
     result.type = getType(tmp);
     result.startString = tmp;
     if (SipMessageType::Unknown == result.type) {
-        throw std::logic_error("Sip message type parsing error"s); //Todo: Exception for prs err
+        std::cerr << "Sip message type parsing error" << std::endl;
+        LOG(ERROR) << "Sip message type parsing error";
+        throw ExitException(ErrorCode::PARSING_ERROR);
     }
 
     while(std::getline(iss, tmp)) {
