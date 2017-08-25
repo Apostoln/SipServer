@@ -16,8 +16,6 @@ SipMessage SipParser::parse(const char* raw) {
     result.type = getType(tmp);
     result.startString = tmp;
     if (SipMessageType::Unknown == result.type) {
-        std::cerr << "Sip message type parsing error" << std::endl;
-        LOG(ERROR) << "Sip message type parsing error";
         throw ExitException(ErrorCode::PARSING_ERROR);
     }
 

@@ -155,23 +155,15 @@ void SipServer::run() {
         }
 
         if (bytesReceived != 0) {
-            try {
-                SipMessage incomingMessage = SipParser::parse(buff);
-                auto outgoingMessage = formOutgoingMessage(incomingMessage);
+            SipMessage incomingMessage = SipParser::parse(buff);
+            auto outgoingMessage = formOutgoingMessage(incomingMessage);
 
-                size_t bytesSent = serverSocket->send_to(asio::buffer(static_cast<std::string>(outgoingMessage)),
+            size_t bytesSent = serverSocket->send_to(asio::buffer(static_cast<std::string>(outgoingMessage)),
                                                          clientEndPoint);
-
-                LOG(INFO) << bytesSent << " bytes sent: ";
-                LOG(INFO) << clientEndPoint.address() << ":"
-                          << clientEndPoint.port() << " < "
-                          << static_cast<std::string>(outgoingMessage);
-            }
-            catch(std::logic_error& e) {
-                std::cerr << e.what() << std::endl;
-                LOG(ERROR) << e.what();
-                exit(5);
-            }
+            LOG(INFO) << bytesSent << " bytes sent: ";
+            LOG(INFO) << clientEndPoint.address() << ":"
+                      << clientEndPoint.port() << " < "
+                      << static_cast<std::string>(outgoingMessage);
         }
     }
 }
