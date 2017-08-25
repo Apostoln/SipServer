@@ -14,7 +14,8 @@ const char* ExitException::what() {
     messages[ErrorCode::NETWORK_INTERFACE_ERROR] = "Network interface is not supported";
     messages[ErrorCode::UNKNOWN_ASIO_ERROR] = "Unknown asio error";
     messages[ErrorCode::PARSING_ERROR] = "Sip message type parsing error";
-
+    messages[ErrorCode::ACCOUNTS_FILE_UNREACHABLE] = "Can't open file with accounts. File";
+    
     std::string errorMessage = messages[errorCode];
     if ("" != additionalDescription) {
         errorMessage +=  ". " + additionalDescription;

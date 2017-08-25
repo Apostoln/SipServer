@@ -8,7 +8,7 @@
 
 #include <easylogging++.h>
 
-el::Level getLogLevel(std::string& logLevel) {
+el::Level getLogLevel(std::string logLevel) {
     /*
      *     Trace
      *     Debug

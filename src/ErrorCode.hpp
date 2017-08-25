@@ -11,6 +11,7 @@ enum class ErrorCode {
     NETWORK_INTERFACE_ERROR = 3,
     UNKNOWN_ASIO_ERROR = 4,
     PARSING_ERROR = 5,
+    ACCOUNTS_FILE_UNREACHABLE = 6,
     UNKNOWN = 10
 };
 

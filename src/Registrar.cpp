@@ -2,6 +2,7 @@
 
 #include <easylogging++.h>
 #include "Registrar.hpp"
+#include "ExitException.hpp"
 
 Registrar::Registrar(std::string& source):
     source(source)
@@ -61,9 +62,8 @@ void Registrar::upload() {
     //rewrite file
     std::ofstream fout(source);
     if(!fout.is_open()) {
-        LOG(ERROR) << "Can't open file with accounts. File "
-                   << this->source << " is damaged or not exist";
-        exit(6);
+        std::string description = "File " + this->source + " is damaged or not exist";
+        throw ExitException(ErrorCode::ACCOUNTS_FILE_UNREACHABLE,description);
     }
     LOG(DEBUG) << accounts.size() << " accounts uploaded:";
     for(auto account: accounts) {
