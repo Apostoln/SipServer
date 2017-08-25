@@ -86,5 +86,5 @@ Registrar Registrar::operator=(Registrar& other)  {
 
 Registrar::~Registrar() {
     LOG(DEBUG) << "~Registrar() is called";
-    download();
+    upload();
 }
