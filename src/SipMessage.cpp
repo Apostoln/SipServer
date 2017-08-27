@@ -53,8 +53,14 @@ SipMessage::SipMessage(const char * rawStringMessage) {
     }
 
     if (SipMessageType::Request == type) {
-        this->method = parseMethod(this->startString);
+        MethodType method = parseMethod(startString);
+        if(MethodType::NONE == method) {
+            std::string description = "Method in request is not parsed. Starting string " + startString;
+            throw ExitException(ErrorCode::PARSING_ERROR, description);
+        }
+        this->method = method;
     }
+
     if(headers.find("Contact") != headers.end()) {
         parseContact(headers.find("Contact")->second);
     }
@@ -86,7 +92,7 @@ SipMessageType SipMessage::getSipMessageType() {
     return type;
 }
 
-std::string SipMessage::getMethod() {
+MethodType SipMessage::getMethod() {
     return method;
 }
 
@@ -104,12 +110,17 @@ SipMessageType SipMessage::parseType(std::string& str) {
     }
 }
 
-std::string SipMessage::parseMethod(std::string& str) {
+MethodType SipMessage::parseMethod(std::string& str) {
     static std::regex methodRegex("([A-Z]{3,9}) .+");
     std::smatch matched;
     if (std::regex_match(str, matched, methodRegex)) {
         auto matchedString = matched[1];
-        return matchedString;
+        if ("REGISTER" == matchedString) {
+            return MethodType::REGISTER;
+        } //TODO: Other method
+        else {
+            return MethodType::NONE;
+        }
     }
     else {
         std::string description = "Method is not found";
@@ -122,9 +133,15 @@ void SipMessage::parseContact(std::string& str) {
     std::smatch matched;
     if (std::regex_match(str, matched, parseContactRegext)) {
         LOG(DEBUG) << "\"Contact\" header is valid";
-    }
-    else {
+    } else {
         std::string description = "\"Contact\" header is not valid";
         throw ExitException(ErrorCode::PARSING_ERROR, description);
     }
+}
+
+std::string SipMessage::getMethod(MethodType methodType) {
+    static std::unordered_map<MethodType , std::string> methods;
+    methods[MethodType::NONE] = "NONE";
+    methods[MethodType::REGISTER] = "REGISTER";
+    return methods[methodType];
 }

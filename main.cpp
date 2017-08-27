@@ -35,12 +35,10 @@ int main(int argc, const char* argv[]) {
         LOG(DEBUG) << "Log level is not specified. Using default log level: " << DEFAULT_LOG_LEVEL;
         logLevel = getLogLevel(DEFAULT_LOG_LEVEL);
     }
-
     if (loggingFile.empty()) {
         LOG(DEBUG) << "Log file is not specified. Default path to log file is used: " << DEFAULT_LOG_FILE_PATH;
         loggingFile = DEFAULT_LOG_FILE_PATH;
     }
-
     if (pathToAccounts.empty()) {
         LOG(DEBUG) << "Path to file with accounts is not specified. "
                    << "Trying to use default path " << DEFAULT_PATH_TO_ACCOUNTS;

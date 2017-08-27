@@ -33,7 +33,7 @@ SipMessage SipServer::formOutgoingMessage(SipMessage incomingMessage) {
     incomingMessage.headers.insert(std::make_pair("Values", valuesHeader));
 
     if(SipMessageType::Request == incomingMessage.type) {
-        incomingMessage.headers.insert(std::make_pair("Method", incomingMessage.method));
+        incomingMessage.headers.insert(std::make_pair("Method", SipMessage::getMethod(incomingMessage.method)));
     }
     return incomingMessage;
 }
