@@ -9,6 +9,7 @@
 class SipParser {
     private:
         static SipMessageType getType(std::string&);
+        static MethodType getMethod(std::string&);
     public:
         static SipMessage parse(const char* raw);
 };

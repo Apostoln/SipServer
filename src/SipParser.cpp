@@ -42,11 +42,18 @@ SipMessage SipParser::parse(const char* raw) {
 
         result.headers.insert(std::make_pair(key,value));
     }
+
+    MethodType method = SipParser::getMethod(result.startString);
+    /*if (MethodType::NONE == method) {
+        std::string description = "Method in request is not parsed. Starting string " + result.startString;
+        throw ExitException(ErrorCode::PARSING_ERROR, description);
+    }*/
+    result.method = method;
     return result;
 }
 
 SipMessageType SipParser::getType(std::string& str) {
-    static std::regex request("[A-Z]{3,9} \\w+:\\w+@.+ SIP\\/2\\.0");
+    static std::regex request("[A-Z]{3,9} .+ SIP\\/2\\.0");
     static std::regex response("SIP\\/2\\.0 \\d{3} \\w+");
     if (std::regex_match(str, request)) {
         return SipMessageType::Request;
@@ -57,4 +64,19 @@ SipMessageType SipParser::getType(std::string& str) {
     else {
         return SipMessageType::Unknown;
     }
+}
+
+MethodType SipParser::getMethod(std::string& str) {
+    static std::regex methodRegex("([A-Z]{3,9}) .+");
+    std::smatch matched;
+    if (std::regex_match(str, matched, methodRegex)) {
+        auto matchedString = matched[1];
+        if ("REGISTER" == matchedString) {
+            return MethodType::REGISTER;
+        } //TODO: Other method
+        else {
+            return MethodType::NONE;
+        }
+    }
+    return MethodType::NONE;
 }

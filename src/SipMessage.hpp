@@ -10,6 +10,11 @@ enum class SipMessageType {
     Unknown = 2
 };
 
+enum class MethodType {
+    NONE = 0,
+    REGISTER = 1
+};
+
 class SipMessage {
     friend class SipParser;
 
@@ -18,8 +23,11 @@ class SipMessage {
         std::multimap<std::string, std::string> headers;
         std::multimap<std::string, std::string> body;
         SipMessageType type;
+        MethodType method = MethodType::NONE;
     public:
         SipMessage() = default;
+        SipMessageType getSipMessageType();
+        MethodType getMethod();
         operator std::string() const;
 };
 

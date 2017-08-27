@@ -26,7 +26,6 @@ int main(int argc, const char* argv[]) {
     auto logLevel = getLogLevel(parser.retrieve<std::string>("logLevel"));
     logLevel = logLevel == el::Level::Unknown? defaultLogLevel : logLevel;
     bool isConsoleOut = !parser.retrieve<std::string>("cout").empty() ;
-
     auto loggingFile = parser.retrieve<std::string>("fileLogger");
     loggingFile = loggingFile != ""? loggingFile: defaultLogFilePath;
     LOG_IF(loggingFile == defaultLogFilePath, DEBUG) << "Default path to log file is used";

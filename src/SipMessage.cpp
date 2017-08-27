@@ -1,5 +1,6 @@
 #include "SipMessage.hpp"
 
+
 SipMessage::operator std::string() const {
     std::string result;
     result += startString;
@@ -18,4 +19,12 @@ SipMessage::operator std::string() const {
         result += "\n";
     }
     return result;
+}
+
+SipMessageType SipMessage::getSipMessageType() {
+    return type;
+}
+
+MethodType SipMessage::getMethod() {
+    return method;
 }
