@@ -1,8 +1,9 @@
 #include <sstream>
 #include <iostream>
+#include <regex>
 
 #include <easylogging++.h>
-#include <regex>
+#include <asio/ip/udp.hpp>
 
 #include "SipMessage.hpp"
 #include "ErrorCode.hpp"
@@ -48,6 +49,9 @@ SipMessage::SipMessage(const char * rawStringMessage) {
         throw ExitException(ErrorCode::PARSING_ERROR, description);
     }*/
     this->method = method;
+    auto parsedContact = parseContact(headers.find("Contact")->second);
+    //senderId = parsedContact.first;
+    //senderEndPoint = parsedContact.second;
 }
 
 SipMessage::operator std::string() const {
@@ -105,4 +109,22 @@ MethodType SipMessage::parseMethod(std::string& str) {
         }
     }
     return MethodType::NONE;
+}
+
+std::pair<std::string, asio::ip::udp::endpoint> SipMessage::parseContact(std::string& str) {
+    static std::regex parseContactRegext("(\\w+:)?(\\w+)@((\\d{1,3}\\.){3}\\d{1,3}):(\\d{4,6}).*");
+    std::string senderId;
+    asio::ip::udp::endpoint senderEndPoint;
+    std::smatch matched;
+    if (std::regex_match(str, matched, parseContactRegext)) {
+        senderId = matched[2];
+        auto senderIpAddress = matched[3];
+        auto senderPort = matched[5];
+        senderEndPoint = asio::ip::udp::endpoint(asio::ip::address::from_string(senderIpAddress), std::stoi(senderPort));
+        LOG(DEBUG) << "Sender endPoint: " << senderIpAddress << ":" << senderPort;
+    }
+    else {
+        //throw ExitException(ErrorCode::PARSING_ERROR);
+    }
+    return std::make_pair(senderId, senderEndPoint);
 }

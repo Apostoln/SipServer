@@ -3,6 +3,8 @@
 #define SIPSERVER_UTILS_HPP
 
 #include <algorithm>
+#include <sstream>
+#include <iostream>
 
 #include <easylogging++.h>
 
@@ -77,6 +79,5 @@ void configureLogger(bool isConsoleOut, std::string loggingFile, el::Level logLe
     LOG(INFO) << "Log level is " << (uint)logLevel;
     LOG(INFO) << "Echo to stdout is " << (isConsoleOut? "" : "not ") << "specified";
 }
-
 
 #endif //SIPSERVER_UTILS_HPP
