@@ -50,6 +50,8 @@ class SipMessage {
         SipMessageType getSipMessageType();
         MethodType getMethod();
         static std::string getMethod(MethodType);
+        std::string getSenderId();
+        asio::ip::udp::endpoint getSenderEndPoint();
         operator std::string() const;
 };
 
