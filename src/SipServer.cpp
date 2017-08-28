@@ -14,28 +14,16 @@ using namespace std::string_literals;
 #include <Registrar.hpp>
 
 SipMessage SipServer::formOutgoingMessage(SipMessage incomingMessage) {
-    std::vector<std::string> headers;
-    std::vector<std::string> values;
-    for (auto i: incomingMessage.headers) {
-        headers.push_back(i.first);
-        values.push_back(i.second);
+    if(MethodType::REGISTER == incomingMessage.getMethod() ) {
+        //TODO:formResponseForRegister();
     }
-    std::ostringstream streamForHeaders;
-    std::copy(headers.begin(), headers.end(), std::ostream_iterator<std::string>(streamForHeaders, ","));
-    std::string headersHeader = streamForHeaders.str();
-    headersHeader.pop_back(); //remove extra comma
-    incomingMessage.headers.insert(std::make_pair("Headers", headersHeader));
+    return SipMessage();
+}
 
-    std::ostringstream streamForValues;
-    std::copy(values.begin(), values.end(), std::ostream_iterator<std::string>(streamForValues, ","));
-    std::string valuesHeader = streamForValues.str();
-    valuesHeader.pop_back(); //remove extra comma
-    incomingMessage.headers.insert(std::make_pair("Values", valuesHeader));
 
-    if(SipMessageType::Request == incomingMessage.type) {
-        incomingMessage.headers.insert(std::make_pair("Method", SipMessage::getMethod(incomingMessage.method)));
-    }
-    return incomingMessage;
+SipMessage SipServer::formResponseForRegisterRequest(SipMessage incomingMessage) {
+    //TODO:
+    return SipMessage();
 }
 
 

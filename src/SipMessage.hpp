@@ -44,7 +44,6 @@ class SipMessage {
         static MethodType parseMethod(std::string&);
         void parseContact(std::string& str);
 
-
     public:
         SipMessage() = default;
         SipMessage(const char* rowStringMessage);

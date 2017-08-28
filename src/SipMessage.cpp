@@ -5,6 +5,7 @@
 #include <easylogging++.h>
 #include <asio/ip/udp.hpp>
 
+
 #include "SipMessage.hpp"
 #include "ErrorCode.hpp"
 #include "ExitException.hpp"
@@ -122,6 +123,7 @@ MethodType SipMessage::parseMethod(std::string& str) {
             return MethodType::NONE;
         }
     }
+
     else {
         std::string description = "Method is not found";
         throw ExitException(ErrorCode::PARSING_ERROR, description);
