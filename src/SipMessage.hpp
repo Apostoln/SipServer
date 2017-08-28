@@ -42,7 +42,7 @@ class SipMessage {
 
         static SipMessageType parseType(std::string&);
         static MethodType parseMethod(std::string&);
-        void parseContact(std::string& str);
+        std::pair<std::string, asio::ip::udp::endpoint> parseContact(std::string& str);
 
     public:
         SipMessage() = default;
