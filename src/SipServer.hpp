@@ -23,7 +23,7 @@ class SipServer {
         void setServerIo(asio::io_service* serverIo);
         void setNetworkInterface(asio::ip::address networkInterface);
 
-        static SipMessage formOutgoingMessage(SipMessage incomingMessage);
+        SipMessage formOutgoingMessage(SipMessage incomingMessage);
         static SipMessage formResponseForRegisterRequest(SipMessage incomingMessage);
 
     public:

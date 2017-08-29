@@ -60,7 +60,7 @@ int main(int argc, const char* argv[]) {
     }
 
     try {
-        SipServer server = sipServerBuilder.build();
+        SipServer server = sipServerBuilder.registrar(registrar).build();
         server.run();
     }
     catch (ExitException& e) {

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <algorithm>
+
 #include <easylogging++.h>
 #include "Registrar.hpp"
 #include "ExitException.hpp"
@@ -88,8 +90,8 @@ Registrar::~Registrar() {
     upload();
 }
 
-bool Registrar::addAccount(SipAccount account) {
-    if(std::find(accounts.begin(), accounts.end(), account) == accounts.end()) {
+bool Registrar::addAccount(const SipAccount& account) {
+    if (std::find(accounts.begin(), accounts.end(), account) == accounts.end()) {
         accounts.push_back(account);
         return true;
     }
