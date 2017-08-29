@@ -14,21 +14,54 @@ using namespace std::string_literals;
 #include <Registrar.hpp>
 
 SipMessage SipServer::formOutgoingMessage(SipMessage incomingMessage) {
+    SipMessage outgointMessage;
     if(MethodType::REGISTER == incomingMessage.getMethod() ) {
         LOG(DEBUG) << "REGISTER method is observed";
         SipAccount account(incomingMessage.getSenderId(), incomingMessage.getSenderEndPoint());
         if (registrar->addAccount(account)) {
             LOG(DEBUG) << "Adding account " << static_cast<std::string>(account);
         }
-        formResponseForRegisterRequest(incomingMessage);
+        outgointMessage = formResponseForRegisterRequest(incomingMessage);
     }
-    return SipMessage();
+
+    return outgointMessage;
 }
 
 
 SipMessage SipServer::formResponseForRegisterRequest(SipMessage incomingMessage) {
 
-    return SipMessage();
+    /*std::cerr << "Headers" << std::endl;
+    for(auto i: incomingMessage.getHeaders()) {
+        std::cerr << i.first << ":" << i.second << std::endl;
+    }
+    std::cerr << "EndHeaders" << std::endl;*/
+
+
+
+
+    std::string startingString = "SIP/2.0 200 OK";
+    std::multimap<std::string, std::string> headers;
+
+    auto callId = *incomingMessage.getHeaders().find("Call-ID");
+    headers.insert(callId);
+    auto via = *incomingMessage.getHeaders().find("Via");
+    headers.insert(via);
+    auto from = *incomingMessage.getHeaders().find("From");
+    headers.insert(from);
+    auto to = *incomingMessage.getHeaders().find("To");
+    headers.insert(std::make_pair(to.first, to.second + ";tag=foobar"));//TODO: tag generation
+    auto cSeq = *incomingMessage.getHeaders().find("CSeq");
+    headers.insert(cSeq);
+    auto contact = *incomingMessage.getHeaders().find("Contact");//TODO: expires implementation
+    headers.insert(contact);
+
+    headers.insert(std::make_pair("Content-Length","0"));
+
+    SipMessage result(startingString, headers, std::string());
+
+    LOG(DEBUG) << "Response to registrar: " << static_cast<std::string>(result);
+
+    return result;
 }
 
 

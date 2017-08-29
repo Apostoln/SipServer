@@ -47,11 +47,18 @@ class SipMessage {
     public:
         SipMessage() = default;
         SipMessage(const char* rowStringMessage);
+        SipMessage(std::string startString,
+                   std::multimap<std::string, std::string> headers,
+                   std::string body);
         SipMessageType getSipMessageType();
         MethodType getMethod();
         static std::string getMethod(MethodType);
         std::string getSenderId();
         asio::ip::udp::endpoint getSenderEndPoint();
+
+        std::multimap<std::string, std::string> getHeaders();
+        std::string getBody();
+
         operator std::string() const;
 };
 

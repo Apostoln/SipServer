@@ -69,6 +69,14 @@ SipMessage::SipMessage(const char * rawStringMessage) {
     }
 }
 
+SipMessage::SipMessage(std::string startString, std::multimap<std::string, std::string> headers,
+                       std::string body):
+    startString(startString), headers(headers), body(body)
+{
+    //
+}
+
+
 SipMessage::operator std::string() const {
     std::string result;
     result += startString;
@@ -165,4 +173,12 @@ std::string SipMessage::getSenderId() {
 
 asio::ip::udp::endpoint SipMessage::getSenderEndPoint() {
     return senderEndPoint;
+}
+
+std::multimap<std::string, std::string> SipMessage::getHeaders() {
+    return headers;
+}
+
+std::string SipMessage::getBody() {
+    return body;
 }
