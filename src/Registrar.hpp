@@ -24,6 +24,7 @@ class Registrar {
         ~Registrar();
         void download();
         void upload();
+        bool addAccount(SipAccount account);
         std::vector<SipAccount> getAccounts();
         Registrar operator=(Registrar &other);
 };

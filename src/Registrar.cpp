@@ -87,3 +87,11 @@ Registrar::~Registrar() {
     LOG(DEBUG) << "~Registrar() is called";
     upload();
 }
+
+bool Registrar::addAccount(SipAccount account) {
+    if(std::find(accounts.begin(), accounts.end(), account) == accounts.end()) {
+        accounts.push_back(account);
+        return true;
+    }
+    return false;
+}

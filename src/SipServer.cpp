@@ -15,6 +15,7 @@ using namespace std::string_literals;
 
 SipMessage SipServer::formOutgoingMessage(SipMessage incomingMessage) {
     if(MethodType::REGISTER == incomingMessage.getMethod() ) {
+        //registrar->addAccount(SipAccount(incomingMessage.getSenderId(), incomingMessage.getSenderEndPoint()));
         formResponseForRegisterRequest(incomingMessage);
     }
     return SipMessage();
@@ -22,7 +23,7 @@ SipMessage SipServer::formOutgoingMessage(SipMessage incomingMessage) {
 
 
 SipMessage SipServer::formResponseForRegisterRequest(SipMessage incomingMessage) {
-    //TODO:
+
     return SipMessage();
 }
 

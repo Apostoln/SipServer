@@ -17,7 +17,7 @@ target_include_directories(easyloggingpp INTERFACE lib/easyloggingpp/src)
 
 include_directories(src)
 
-set(SOURCE_FILES main.cpp src/SipServer.hpp src/SipServer.cpp src/Builder.cpp src/Builder.hpp src/utils.hpp src/ErrorCode.hpp src/ExitException.cpp src/ExitException.hpp src/SipMessage.cpp src/SipMessage.hpp src/Registrar.cpp src/Registrar.hpp src/SipAccount.hpp src/constants.hpp)
+set(SOURCE_FILES main.cpp src/SipServer.hpp src/SipServer.cpp src/Builder.cpp src/Builder.hpp src/utils.hpp src/ErrorCode.hpp src/ExitException.cpp src/ExitException.hpp src/SipMessage.cpp src/SipMessage.hpp src/Registrar.cpp src/Registrar.hpp src/SipAccount.hpp src/constants.hpp src/SipAccount.cpp)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 target_link_libraries(${PROJECT_NAME} asio argparse easyloggingpp pthread)
