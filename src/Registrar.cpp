@@ -26,9 +26,8 @@ void Registrar::download() {
     std::ifstream fin(source);
 
     if(!fin.is_open()) {
-        LOG(ERROR) << "Can't open file with accounts. File "
-                   << this->source << " is damaged or not exist";
-        exit(6);
+        std::string description = "File " + this->source + " is damaged or not exist";
+        throw ExitException(ErrorCode::ACCOUNTS_FILE_UNREACHABLE, description);
     }
 
     //read file to buffer
