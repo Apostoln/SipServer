@@ -14,17 +14,17 @@ using namespace std::string_literals;
 #include <Registrar.hpp>
 
 SipMessage SipServer::formOutgoingMessage(SipMessage incomingMessage) {
-    SipMessage outgointMessage;
+    SipMessage outgoingMessage;
     if(MethodType::REGISTER == incomingMessage.getMethod() ) {
         LOG(DEBUG) << "REGISTER method is observed";
         SipAccount account(incomingMessage.getSenderId(), incomingMessage.getSenderEndPoint());
         if (registrar->addAccount(account)) {
             LOG(DEBUG) << "Adding account " << static_cast<std::string>(account);
         }
-        outgointMessage = formResponseForRegisterRequest(incomingMessage);
+        outgoingMessage = formResponseForRegisterRequest(incomingMessage);
     }
 
-    return outgointMessage;
+    return outgoingMessage;
 }
 
 
