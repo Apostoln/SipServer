@@ -38,5 +38,22 @@ el::Level getLogLevel(std::string& logLevel) {
     }
 }
 
+void configureLogger(bool isConsoleOut, std::string loggingFile, el::Level logLevel) {
+    el::Configurations conf;
+    conf.set(el::Level::Global, el::ConfigurationType::Format, "%level %datetime{%H:%m:%s} [%fbase]: %msg");
+    conf.set(el::Level::Global, el::ConfigurationType::ToStandardOutput, isConsoleOut? "true": "false");
+    if ("" != loggingFile) {
+        conf.set(el::Level::Global, el::ConfigurationType::Filename, loggingFile);
+    }
+    el::Loggers::reconfigureAllLoggers(conf);
+
+    el::Loggers::addFlag(el::LoggingFlag::ColoredTerminalOutput);
+
+    LOG(INFO) << "Logger of SipServer is started";
+    LOG(INFO) << "Log is wrote to " << loggingFile;
+    LOG(INFO) << "Log level is " << (uint)logLevel;
+    LOG(INFO) << "Echo to stdout is " << (isConsoleOut? "" : "not ") << "specified";
+}
+
 
 #endif //SIPSERVER_UTILS_HPP

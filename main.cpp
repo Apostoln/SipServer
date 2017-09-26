@@ -35,19 +35,7 @@ int main(int argc, const char* argv[]) {
     loggingFile = loggingFile != ""? loggingFile: defaultLogFilePath;
     LOG_IF(loggingFile == defaultLogFilePath, DEBUG) << "Default path to log file is used";
 
-    el::Loggers::reconfigureAllLoggers(el::ConfigurationType::Format, "%level %datetime{%H:%m:%s} [%fbase]: %msg");
-    el::Loggers::reconfigureAllLoggers(el::ConfigurationType::ToStandardOutput, isConsoleOut? "true": "false");
-    if ("" != loggingFile) {
-        el::Loggers::reconfigureAllLoggers(el::ConfigurationType::Filename, loggingFile);
-    }
-    el::Loggers::addFlag(el::LoggingFlag::ColoredTerminalOutput);
-    el::Loggers::addFlag(el::LoggingFlag::HierarchicalLogging);
-    el::Loggers::setLoggingLevel(logLevel);
-
-    LOG(INFO) << "Logger of SipServer is started";
-    LOG(INFO) << "Log is wrote to " << loggingFile;
-    LOG(INFO) << "Log level is " << (uint)logLevel;
-    LOG(INFO) << "Echo to stdout is " << (isConsoleOut? "" : "not ") << "specified";
+    configureLogger(isConsoleOut, loggingFile, logLevel);
 
     SipServer::Builder sipServerBuilder;
     if (!portArg.empty()) {
