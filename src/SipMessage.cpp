@@ -44,14 +44,10 @@ SipMessage::SipMessage(const char * rawStringMessage) {
     }
 
     MethodType method = parseMethod(this->startString);
-    /*if (MethodType::NONE == method) {
-        std::string description = "Method in request is not parsed. Starting string " + this->startString;
-        throw ExitException(ErrorCode::PARSING_ERROR, description);
-    }*/
     this->method = method;
-    auto parsedContact = parseContact(headers.find("Contact")->second);
-    //senderId = parsedContact.first;
-    //senderEndPoint = parsedContact.second;
+    if(headers.find("Contact") != headers.end()) {
+        parseContact(headers.find("Contact")->second);
+    }
 }
 
 SipMessage::operator std::string() const {
@@ -111,20 +107,14 @@ MethodType SipMessage::parseMethod(std::string& str) {
     return MethodType::NONE;
 }
 
-std::pair<std::string, asio::ip::udp::endpoint> SipMessage::parseContact(std::string& str) {
-    static std::regex parseContactRegext("(\\w+:)?(\\w+)@((\\d{1,3}\\.){3}\\d{1,3}):(\\d{4,6}).*");
-    std::string senderId;
-    asio::ip::udp::endpoint senderEndPoint;
+void SipMessage::parseContact(std::string& str) {
+    static std::regex parseContactRegext("<?(\\w+:)?(\\w+)@((\\d{1,3}\\.){3}\\d{1,3}):?(\\d{4,6})?>?.*");
     std::smatch matched;
     if (std::regex_match(str, matched, parseContactRegext)) {
-        senderId = matched[2];
-        auto senderIpAddress = matched[3];
-        auto senderPort = matched[5];
-        senderEndPoint = asio::ip::udp::endpoint(asio::ip::address::from_string(senderIpAddress), std::stoi(senderPort));
-        LOG(DEBUG) << "Sender endPoint: " << senderIpAddress << ":" << senderPort;
+        LOG(DEBUG) << "\"Contact\" header is valid";
     }
     else {
-        //throw ExitException(ErrorCode::PARSING_ERROR);
+        std::string description = "\"Contact\" header is not valid";
+        throw ExitException(ErrorCode::PARSING_ERROR );
     }
-    return std::make_pair(senderId, senderEndPoint);
 }
