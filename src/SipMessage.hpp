@@ -13,11 +13,6 @@ enum class SipMessageType {
     Unknown = 2
 };
 
-enum class MethodType {
-    NONE = 0,
-    REGISTER = 1
-};
-
 class SipMessage {
     friend class SipServer;
 
@@ -26,20 +21,20 @@ class SipMessage {
         std::multimap<std::string, std::string> headers;
         std::multimap<std::string, std::string> body;
         SipMessageType type;
-        MethodType method = MethodType::NONE;
+        std::string method;
 
         std::string senderId;
         asio::ip::udp::endpoint senderEndPoint;
 
         static SipMessageType parseType(std::string&);
-        static MethodType parseMethod(std::string&);
+        static std::string parseMethod(std::string&);
         void parseContact(std::string& str);
 
     public:
         SipMessage() = default;
         SipMessage(const char* rowStringMessage);
         SipMessageType getSipMessageType();
-        MethodType getMethod();
+        std::string getMethod();
         operator std::string() const;
 };
 

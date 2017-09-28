@@ -43,8 +43,7 @@ SipMessage::SipMessage(const char * rawStringMessage) {
         this->headers.insert(std::make_pair(key,value));
     }
 
-    MethodType method = parseMethod(this->startString);
-    this->method = method;
+    this->method = parseMethod(this->startString);
     if(headers.find("Contact") != headers.end()) {
         parseContact(headers.find("Contact")->second);
     }
@@ -74,7 +73,7 @@ SipMessageType SipMessage::getSipMessageType() {
     return type;
 }
 
-MethodType SipMessage::getMethod() {
+std::string SipMessage::getMethod() {
     return method;
 }
 
@@ -92,19 +91,17 @@ SipMessageType SipMessage::parseType(std::string& str) {
     }
 }
 
-MethodType SipMessage::parseMethod(std::string& str) {
+std::string SipMessage::parseMethod(std::string& str) {
     static std::regex methodRegex("([A-Z]{3,9}) .+");
     std::smatch matched;
     if (std::regex_match(str, matched, methodRegex)) {
         auto matchedString = matched[1];
-        if ("REGISTER" == matchedString) {
-            return MethodType::REGISTER;
-        } //TODO: Other method
-        else {
-            return MethodType::NONE;
-        }
+        return matchedString;
     }
-    return MethodType::NONE;
+    else {
+        std::string description = "Method is not found";
+        throw ExitException(ErrorCode::PARSING_ERROR, description);
+    }
 }
 
 void SipMessage::parseContact(std::string& str) {
