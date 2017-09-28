@@ -43,7 +43,9 @@ SipMessage::SipMessage(const char * rawStringMessage) {
         this->headers.insert(std::make_pair(key,value));
     }
 
-    this->method = parseMethod(this->startString);
+    if (SipMessageType::Request == type) {
+        this->method = parseMethod(this->startString);
+    }
     if(headers.find("Contact") != headers.end()) {
         parseContact(headers.find("Contact")->second);
     }

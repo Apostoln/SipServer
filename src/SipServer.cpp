@@ -30,11 +30,15 @@ SipMessage SipServer::formOutgoingMessage(SipMessage incomingMessage) {
     std::string valuesHeader = streamForValues.str();
     valuesHeader.pop_back(); //remove extra comma
     incomingMessage.headers.insert(std::make_pair("Values", valuesHeader));
+
+    if(SipMessageType::Request == incomingMessage.type) {
+        incomingMessage.headers.insert(std::make_pair("Method", incomingMessage.method));
+    }
     return incomingMessage;
 }
 
 
-    SipServer::SipServer():
+SipServer::SipServer():
     serverIo(new asio::io_service()),
     networkInterface(asio::ip::address()),
     port(0)
