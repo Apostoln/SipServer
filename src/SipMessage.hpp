@@ -19,7 +19,7 @@ class SipMessage {
     private:
         std::string startString;
         std::multimap<std::string, std::string> headers;
-        std::multimap<std::string, std::string> body;
+        std::string body;
         SipMessageType type;
         std::string method;
 

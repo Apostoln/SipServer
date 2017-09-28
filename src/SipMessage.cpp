@@ -18,17 +18,21 @@ SipMessage::SipMessage(const char * rawStringMessage) {
     if (SipMessageType::Unknown == this->type) {
         throw ExitException(ErrorCode::PARSING_ERROR);
     }
-
+    bool isEmptyStringContained = false;
     while(std::getline(iss, tmp)) {
         //Todo: СДЕЛАТЬ НАРМАЛЬНА
         if("" == tmp) {
+            isEmptyStringContained = true;
             while(std::getline(iss, tmp)) {
+                body += tmp;
+                body += '\n';
+                /* SDP parsing is not necessary now
                 std::istringstream line(tmp);
                 std::string key;
                 std::string value;
                 std::getline(line, key, '=');
                 std::getline(line, value);
-                this->body.insert(std::make_pair(key,value));
+                this->body.insert(std::make_pair(key,value));*/
             }
             break;
         }
@@ -41,6 +45,10 @@ SipMessage::SipMessage(const char * rawStringMessage) {
         value.erase(0, value.find_first_not_of(' '));       //prefixing spaces
 
         this->headers.insert(std::make_pair(key,value));
+    }
+    if (!isEmptyStringContained) {
+        std::string description = "Empty string is missed in SIP message";
+        throw ExitException(ErrorCode::PARSING_ERROR, description);
     }
 
     if (SipMessageType::Request == type) {
@@ -62,12 +70,14 @@ SipMessage::operator std::string() const {
         result += "\n";
     }
     result += "\n";
-    for(auto elem: body) {
+    result += body;
+    /*SDP handling is not necessary now
+        for(auto elem: body) {
         result += elem.first;
         result += "=";
         result += elem.second;
         result += "\n";
-    }
+    }*/
     return result;
 }
 
