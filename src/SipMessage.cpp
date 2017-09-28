@@ -16,6 +16,7 @@ SipMessage::SipMessage(const char * rawStringMessage) {
     this->type = parseType(tmp);
     this->startString = tmp;
     if (SipMessageType::Unknown == this->type) {
+        std::string description = "Unknown message type";
         throw ExitException(ErrorCode::PARSING_ERROR);
     }
     bool isEmptyStringContained = false;
@@ -124,6 +125,6 @@ void SipMessage::parseContact(std::string& str) {
     }
     else {
         std::string description = "\"Contact\" header is not valid";
-        throw ExitException(ErrorCode::PARSING_ERROR );
+        throw ExitException(ErrorCode::PARSING_ERROR, description);
     }
 }
