@@ -4,29 +4,15 @@
 
 #include <map>
 
-#include <asio/ip/udp.hpp>
+#include <MethodType.hpp>
 
+#include <asio/ip/udp.hpp>
 
 enum class SipMessageType {
     Request = 0,
     Response = 1,
     Unknown = 2
 };
-
-enum class MethodType {
-    NONE = 0,
-    REGISTER = 1
-};
-
-namespace std {
-    template <>
-    struct hash<MethodType> {
-        size_t operator()(MethodType method) const {
-            return hash<int>()(static_cast<std::underlying_type<MethodType >::type>(method));
-        }
-    };
-}
-
 
 class SipMessage {
     friend class SipServer;
