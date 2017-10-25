@@ -47,8 +47,6 @@ int main(int argc, const char* argv[]) {
 
     configureLogger(isConsoleOut, loggingFile, logLevel);
 
-    Registrar* registrar = new Registrar(pathToAccounts);
-
     SipServer::Builder sipServerBuilder;
     if (!portArg.empty()) {
         auto port = (uint) std::stoi(portArg);
@@ -60,6 +58,7 @@ int main(int argc, const char* argv[]) {
     }
 
     try {
+        Registrar* registrar = new Registrar(pathToAccounts);
         SipServer server = sipServerBuilder.registrar(registrar).build();
         server.run();
     }
