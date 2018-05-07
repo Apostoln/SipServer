@@ -8,62 +8,49 @@ using namespace std::string_literals;
 
 #include <easylogging++.h>
 
+#include <resip/stack/SipMessage.hxx>
+#include <resip/stack/MethodTypes.hxx>
+#include <resip/stack/Helper.hxx>
+#include <resip/stack/NameAddr.hxx>
+#include <rutil/Data.hxx>
+
 #include <SipServer.hpp>
 #include <ExitException.hpp>
 #include <ErrorCode.hpp>
 #include <Registrar.hpp>
 
-SipMessage SipServer::formOutgoingMessage(SipMessage incomingMessage) {
-    SipMessage outgoingMessage;
-    if(MethodType::REGISTER == incomingMessage.getMethod() ) {
+std::string toString(resip::SipMessage msg) {
+    std::ostringstream oss;
+    oss << msg;
+    return oss.str();
+}
+
+resip::SipMessage SipServer::formOutgoingMessage(resip::SipMessage& incomingMessage) {
+    resip::SipMessage outgoingMessage;
+    if (resip::REGISTER == incomingMessage.method() ) {
         LOG(DEBUG) << "REGISTER method is observed";
-        SipAccount account(incomingMessage.getSenderId(), incomingMessage.getSenderEndPoint());
+
+        auto uri = incomingMessage.header(resip::h_Contacts).front().uri();
+        std::string senderId = uri.user().c_str();
+        std::string senderIp = uri.host().c_str();
+        auto senderPort = std::atoi(uri.host().c_str());
+
+        asio::ip::udp::endpoint senderEndpoint(asio::ip::address::from_string(senderIp), senderPort);
+        SipAccount account(senderId, senderEndpoint);
         if (registrar->addAccount(account)) {
             LOG(DEBUG) << "Adding account " << static_cast<std::string>(account);
         }
-        outgoingMessage = formResponseForRegisterRequest(incomingMessage);
+
+        outgoingMessage = *resip::Helper::makeResponse(incomingMessage,
+                                                       200,
+                                                       incomingMessage.header(resip::h_Contacts).front());
+        //TODO: Send responce 401 with WWW-Authenticate
+        //TODO: Expect resigster with nonce
+        //TODO: Send response 200 OK
     }
 
     return outgoingMessage;
 }
-
-
-SipMessage SipServer::formResponseForRegisterRequest(SipMessage incomingMessage) {
-
-    /*std::cerr << "Headers" << std::endl;
-    for(auto i: incomingMessage.getHeaders()) {
-        std::cerr << i.first << ":" << i.second << std::endl;
-    }
-    std::cerr << "EndHeaders" << std::endl;*/
-
-
-
-
-    std::string startingString = "SIP/2.0 200 OK";
-    std::multimap<std::string, std::string> headers;
-
-    auto callId = *incomingMessage.getHeaders().find("Call-ID");
-    headers.insert(callId);
-    auto via = *incomingMessage.getHeaders().find("Via");
-    headers.insert(via);
-    auto from = *incomingMessage.getHeaders().find("From");
-    headers.insert(from);
-    auto to = *incomingMessage.getHeaders().find("To");
-    headers.insert(std::make_pair(to.first, to.second + ";tag=foobar"));//TODO: tag generation
-    auto cSeq = *incomingMessage.getHeaders().find("CSeq");
-    headers.insert(cSeq);
-    auto contact = *incomingMessage.getHeaders().find("Contact");//TODO: expires implementation
-    headers.insert(contact);
-
-    headers.insert(std::make_pair("Content-Length","0"));
-
-    SipMessage result(startingString, headers, std::string());
-
-    LOG(DEBUG) << "Response to registrar: " << static_cast<std::string>(result);
-
-    return result;
-}
-
 
 SipServer::SipServer():
     serverIo(new asio::io_service()),
@@ -189,15 +176,15 @@ void SipServer::run() {
         }
 
         if (bytesReceived != 0) {
-            SipMessage incomingMessage = SipMessage(buff);
+            resip::SipMessage incomingMessage = *resip::SipMessage::make(resip::Data(buff));
             auto outgoingMessage = formOutgoingMessage(incomingMessage);
 
-            size_t bytesSent = serverSocket->send_to(asio::buffer(static_cast<std::string>(outgoingMessage)),
+            size_t bytesSent = serverSocket->send_to(asio::buffer(toString(outgoingMessage)),
                                                          clientEndPoint);
             LOG(INFO) << bytesSent << " bytes sent: ";
             LOG(INFO) << clientEndPoint.address() << ":"
                       << clientEndPoint.port() << " < "
-                      << static_cast<std::string>(outgoingMessage);
+                      << outgoingMessage;
         }
     }
 }

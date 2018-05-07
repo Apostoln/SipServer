@@ -7,8 +7,10 @@
 #include <asio/io_service.hpp>
 #include <asio/ip/udp.hpp>
 
+#include <resip/stack/SipMessage.hxx>
+
 #include <Registrar.hpp>
-#include <SipMessage.hpp>
+
 
 class SipServer {
     private:
@@ -23,8 +25,7 @@ class SipServer {
         void setServerIo(asio::io_service* serverIo);
         void setNetworkInterface(asio::ip::address networkInterface);
 
-        SipMessage formOutgoingMessage(SipMessage incomingMessage);
-        static SipMessage formResponseForRegisterRequest(SipMessage incomingMessage);
+        resip::SipMessage formOutgoingMessage(resip::SipMessage& incomingMessage);
 
     public:
         class Builder;
