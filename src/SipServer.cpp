@@ -26,9 +26,26 @@ std::string toString(resip::SipMessage msg) {
     return oss.str();
 }
 
-bool SipServer::isAuth(resip::SipMessage&) {
-    //TODO: MD5 digest
-    return true;
+bool SipServer::isAuth(resip::SipMessage& msg) {
+    if (!msg.exists(resip::h_Authorizations)) {
+        return false;
+    }
+    auto authHeader = msg.header(resip::h_Authorizations).front();
+
+    auto username = authHeader.param(resip::p_username);
+    const char* password = "qwerty"; //TODO: Take from account
+    auto realm = authHeader.param(resip::p_realm);
+    auto method = getMethodName(msg.method());
+    auto uri = authHeader.param(resip::p_uri);
+    auto nonce = this->nonce; //TODO: Nonces generation
+
+    resip::Data response = resip::Helper::makeResponseMD5(username,
+                                                          password,
+                                                          realm,
+                                                          method,
+                                                          uri,
+                                                          nonce);
+    return response == authHeader.param(resip::p_response);
 }
 
 bool SipServer::send(resip::SipMessage msg, asio::ip::udp::endpoint to) {
@@ -69,7 +86,7 @@ void SipServer::onRegister(resip::SipMessage registerRequest) {
 
     resip::Auth auth;
     auth.scheme() = "Digest";
-    auth.param(resip::p_nonce) = "99b12a42a73b0da8dc2b4f071a5efb16";
+    auth.param(resip::p_nonce) = nonce;
     auth.param(resip::p_algorithm) = "MD5";
     auth.param(resip::p_realm) = registerRequest.header(resip::h_To).uri().getAor();
     response401.header(resip::h_WWWAuthenticates).push_back(auth);
@@ -94,6 +111,7 @@ void SipServer::onRegister(resip::SipMessage registerRequest) {
     }
     else {
         LOG(DEBUG) << "UNAUTHORIZED";
+        onRegister(registerWithAuth); //send 401 and process again
     }
 
 }
