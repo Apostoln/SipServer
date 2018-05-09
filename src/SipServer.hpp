@@ -25,7 +25,7 @@ class SipServer {
         void setServerIo(asio::io_service* serverIo);
         void setNetworkInterface(asio::ip::address networkInterface);
 
-        resip::SipMessage formOutgoingMessage(resip::SipMessage& incomingMessage);
+        void process(resip::SipMessage& incomingMessage);
 
     public:
         class Builder;
@@ -43,6 +43,12 @@ class SipServer {
         void changeNetworkInterface(asio::ip::address networkInterface);
 
 
+        void onRegister(resip::SipMessage registerRequest);
+
+        bool send(resip::SipMessage msg, asio::ip::udp::endpoint to);
+        resip::SipMessage receive(asio::ip::udp::endpoint from);
+
+        bool isAuth(resip::SipMessage&);
         unsigned short getPort();
         asio::ip::address getNetworkInterface();
         std::vector<asio::ip::udp::endpoint> getClients();

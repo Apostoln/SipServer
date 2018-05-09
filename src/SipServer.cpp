@@ -12,6 +12,7 @@ using namespace std::string_literals;
 #include <resip/stack/MethodTypes.hxx>
 #include <resip/stack/Helper.hxx>
 #include <resip/stack/NameAddr.hxx>
+#include "resip/stack/HeaderFieldValue.hxx"
 #include <rutil/Data.hxx>
 
 #include <SipServer.hpp>
@@ -25,31 +26,84 @@ std::string toString(resip::SipMessage msg) {
     return oss.str();
 }
 
-resip::SipMessage SipServer::formOutgoingMessage(resip::SipMessage& incomingMessage) {
-    resip::SipMessage outgoingMessage;
-    if (resip::REGISTER == incomingMessage.method() ) {
-        LOG(DEBUG) << "REGISTER method is observed";
+bool SipServer::isAuth(resip::SipMessage&) {
+    //TODO: MD5 digest
+    return true;
+}
 
-        auto uri = incomingMessage.header(resip::h_Contacts).front().uri();
-        std::string senderId = uri.user().c_str();
-        std::string senderIp = uri.host().c_str();
-        auto senderPort = std::atoi(uri.host().c_str());
+bool SipServer::send(resip::SipMessage msg, asio::ip::udp::endpoint to) {
+    size_t bytesSent = serverSocket->send_to(asio::buffer(toString(msg)),
+                                             to);
+    LOG(INFO) << bytesSent << " bytes sent: ";
+    LOG(INFO) << to.address() << ":"
+              << to.port() << " < " << std::endl
+              << msg;
+    return bytesSent > 0;
+}
 
-        asio::ip::udp::endpoint senderEndpoint(asio::ip::address::from_string(senderIp), senderPort);
-        SipAccount account(senderId, senderEndpoint);
+resip::SipMessage SipServer::receive(asio::ip::udp::endpoint from) {
+    char buff[4096] = {0};
+    //Amount of received bytes
+    size_t bytesReceived = serverSocket->receive_from(asio::buffer(buff),
+                                                      from);
+    resip::Data data(buff);
+
+    LOG(INFO) << bytesReceived << " bytes received: ";
+    LOG(INFO) << from.address() << ":"
+              << from.port() << " > " << std::endl
+              << buff;
+
+    return *resip::SipMessage::make(data);
+
+}
+
+void SipServer::onRegister(resip::SipMessage registerRequest) {
+    auto uri = registerRequest.header(resip::h_Contacts).front().uri();
+    std::string userId = uri.user().c_str();
+    std::string senderIp = uri.host().c_str();
+    auto senderPort = uri.port();
+    asio::ip::udp::endpoint userEndPoint(asio::ip::address::from_string(senderIp), senderPort);
+
+    // Send 401 with WWW-Authenticate
+    auto response401 = *resip::Helper::makeResponse(registerRequest, 401);
+
+    resip::Auth auth;
+    auth.scheme() = "Digest";
+    auth.param(resip::p_nonce) = "99b12a42a73b0da8dc2b4f071a5efb16";
+    auth.param(resip::p_algorithm) = "MD5";
+    auth.param(resip::p_realm) = registerRequest.header(resip::h_To).uri().getAor();
+    response401.header(resip::h_WWWAuthenticates).push_back(auth);
+
+    send(response401, userEndPoint);
+
+    // Receive register with Authorization
+    auto registerWithAuth = receive(userEndPoint);
+
+    //check response
+    bool isAuthed = isAuth(registerWithAuth);
+    if (isAuthed) {
+        // Send 200 OK
+        auto response200 = *resip::Helper::makeResponse(registerWithAuth, 200);
+        send(response200, userEndPoint);
+
+        // Add to accounts
+        SipAccount account(userId, userEndPoint);
         if (registrar->addAccount(account)) {
             LOG(DEBUG) << "Adding account " << static_cast<std::string>(account);
         }
-
-        outgoingMessage = *resip::Helper::makeResponse(incomingMessage,
-                                                       200,
-                                                       incomingMessage.header(resip::h_Contacts).front());
-        //TODO: Send responce 401 with WWW-Authenticate
-        //TODO: Expect resigster with nonce
-        //TODO: Send response 200 OK
+    }
+    else {
+        LOG(DEBUG) << "UNAUTHORIZED";
     }
 
-    return outgoingMessage;
+}
+
+void SipServer::process(resip::SipMessage& incomingMessage) {
+    if (resip::REGISTER == incomingMessage.method() ) {
+        LOG(DEBUG) << "REGISTER method is observed";
+        onRegister(incomingMessage);
+        return;
+    }
 }
 
 SipServer::SipServer():
@@ -169,22 +223,16 @@ void SipServer::run() {
                   << clientEndPoint.port() << " > "
                   << buff;
 
+        /* It needs?
         //Add new connection if it is not exist
         if (std::find(clients.begin(), clients.end(), clientEndPoint) == clients.end()) {
             clients.push_back(clientEndPoint);
             LOG(INFO) << "Client was added: " << clientEndPoint.address() << ":" << clientEndPoint.port();
-        }
+        }*/
 
         if (bytesReceived != 0) {
             resip::SipMessage incomingMessage = *resip::SipMessage::make(resip::Data(buff));
-            auto outgoingMessage = formOutgoingMessage(incomingMessage);
-
-            size_t bytesSent = serverSocket->send_to(asio::buffer(toString(outgoingMessage)),
-                                                         clientEndPoint);
-            LOG(INFO) << bytesSent << " bytes sent: ";
-            LOG(INFO) << clientEndPoint.address() << ":"
-                      << clientEndPoint.port() << " < "
-                      << outgoingMessage;
+            process(incomingMessage);
         }
     }
 }
