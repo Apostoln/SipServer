@@ -26,28 +26,6 @@ std::string toString(resip::SipMessage msg) {
     return oss.str();
 }
 
-bool SipServer::isAuth(resip::SipMessage& msg) {
-    if (!msg.exists(resip::h_Authorizations)) {
-        return false;
-    }
-    auto authHeader = msg.header(resip::h_Authorizations).front();
-
-    auto username = authHeader.param(resip::p_username);
-    const char* password = "qwerty"; //TODO: Take from account
-    auto realm = authHeader.param(resip::p_realm);
-    auto method = getMethodName(msg.method());
-    auto uri = authHeader.param(resip::p_uri);
-    auto nonce = this->nonce; //TODO: Nonces generation
-
-    resip::Data response = resip::Helper::makeResponseMD5(username,
-                                                          password,
-                                                          realm,
-                                                          method,
-                                                          uri,
-                                                          nonce);
-    return response == authHeader.param(resip::p_response);
-}
-
 bool SipServer::send(resip::SipMessage msg, asio::ip::udp::endpoint to) {
     size_t bytesSent = serverSocket->send_to(asio::buffer(toString(msg)),
                                              to);
@@ -83,21 +61,16 @@ void SipServer::onRegister(resip::SipMessage registerRequest) {
 
     // Send 401 with WWW-Authenticate
     auto response401 = *resip::Helper::makeResponse(registerRequest, 401);
-
-    resip::Auth auth;
-    auth.scheme() = "Digest";
-    auth.param(resip::p_nonce) = nonce;
-    auth.param(resip::p_algorithm) = "MD5";
-    auth.param(resip::p_realm) = registerRequest.header(resip::h_To).uri().getAor();
-    response401.header(resip::h_WWWAuthenticates).push_back(auth);
+    authManager.addAuthParameters(response401);
 
     send(response401, userEndPoint);
 
     // Receive register with Authorization
     auto registerWithAuth = receive(userEndPoint);
 
-    //check response
-    bool isAuthed = isAuth(registerWithAuth);
+    //Check response
+    bool isAuthed = authManager.isAuth(registerWithAuth);
+
     if (isAuthed) {
         // Send 200 OK
         auto response200 = *resip::Helper::makeResponse(registerWithAuth, 200);

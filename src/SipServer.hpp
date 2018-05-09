@@ -10,6 +10,7 @@
 #include <resip/stack/SipMessage.hxx>
 
 #include <Registrar.hpp>
+#include <AuthManager.hpp>
 
 
 class SipServer {
@@ -19,7 +20,9 @@ class SipServer {
         unsigned short port;
         asio::ip::address networkInterface;
         std::vector<asio::ip::udp::endpoint> clients;
+
         Registrar* registrar;
+        AuthManager authManager;
 
         void setPort(unsigned short port);
         void setServerIo(asio::io_service* serverIo);
@@ -48,7 +51,6 @@ class SipServer {
         bool send(resip::SipMessage msg, asio::ip::udp::endpoint to);
         resip::SipMessage receive(asio::ip::udp::endpoint from);
 
-        bool isAuth(resip::SipMessage&);
         unsigned short getPort();
         asio::ip::address getNetworkInterface();
         std::vector<asio::ip::udp::endpoint> getClients();
