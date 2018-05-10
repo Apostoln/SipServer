@@ -2,7 +2,11 @@
 
 
 void Nonce::generateNonce() {
-    mValue = "foobarbuz"; //TODO: generation
+    // crutch
+    resip::Data timeStamp = std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()).c_str(); //KILL ME PLEASE
+    std::shared_ptr<resip::SipMessage> seedDummyMessage(resip::Helper::makeRegister(resip::NameAddr("sip:foo@127.0.0.1"), resip::NameAddr("sip:bar@127.0.0.1")));
+    mValue = resip::Helper::makeNonce(*seedDummyMessage, timeStamp);
+
 }
 
 Nonce::Nonce():
