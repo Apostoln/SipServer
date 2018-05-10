@@ -12,6 +12,10 @@ SipAccount::operator std::string() const {
     return result;
 }
 
+bool SipAccount::operator==(const std::string &other) {
+    return name == other;
+}
+
 void Nonce::generateNonce() {
     // crutch
     resip::Data timeStamp = std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()).c_str(); //KILL ME PLEASE
@@ -110,11 +114,18 @@ bool AuthManager::isAuth(resip::SipMessage& msg) {
     auto authHeader = msg.header(resip::h_Authorizations).front();
 
     auto username = authHeader.param(resip::p_username);
-    const char* password = "qwerty"; //TODO: Take from account
+    std::string usernameString(username.c_str());
+    auto it = std::find(accounts.begin(), accounts.end(), usernameString);
+    if (it == accounts.end()) {
+        LOG(DEBUG) << "Account " << username  << " is not found";
+        return false;
+    }
+
+    const char* password = it->pass.c_str();
     auto realm = authHeader.param(resip::p_realm);
     auto method = getMethodName(msg.method());
     auto uri = authHeader.param(resip::p_uri);
-    auto nonce = this->nonce; //TODO: Nonces generation
+    auto nonce = this->nonce;
 
     resip::Data response = resip::Helper::makeResponseMD5(username,
                                                           password,

@@ -55,8 +55,6 @@ class SipServer {
         unsigned short getPort();
         asio::ip::address getNetworkInterface();
         std::vector<asio::ip::udp::endpoint> getClients();
-
-        const char* nonce = "99b12a42a73b0da8dc2b4f071a5efb16"; //TODO: nonce generation
 };
 
 #endif //SIPSERVER_SIPSERVER_HPP

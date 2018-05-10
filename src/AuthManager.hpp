@@ -15,6 +15,7 @@ struct SipAccount {
     std::string pass;
 
     operator std::string() const;
+    bool operator ==(const std::string& other);
 };
 
 class Nonce {
