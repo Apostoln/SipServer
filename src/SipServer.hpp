@@ -19,7 +19,6 @@ class SipServer {
         asio::ip::udp::socket* serverSocket;
         unsigned short port;
         asio::ip::address networkInterface;
-        std::vector<asio::ip::udp::endpoint> clients;
 
         Registrar* registrar;
         AuthManager* authManager;
@@ -40,7 +39,6 @@ class SipServer {
         void init();
         void updateSocket();
         void run();
-        void removeClient(asio::ip::udp::endpoint& client);
 
         void changePort(unsigned short port);
         void changeServerIo(asio::io_service* serverIo);
@@ -54,7 +52,6 @@ class SipServer {
 
         unsigned short getPort();
         asio::ip::address getNetworkInterface();
-        std::vector<asio::ip::udp::endpoint> getClients();
 };
 
 #endif //SIPSERVER_SIPSERVER_HPP

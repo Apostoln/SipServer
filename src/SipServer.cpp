@@ -213,24 +213,11 @@ void SipServer::run() {
                   << clientEndPoint.port() << " > "
                   << buff;
 
-        /* It needs?
-        //Add new connection if it is not exist
-        if (std::find(clients.begin(), clients.end(), clientEndPoint) == clients.end()) {
-            clients.push_back(clientEndPoint);
-            LOG(INFO) << "Client was added: " << clientEndPoint.address() << ":" << clientEndPoint.port();
-        }*/
-
         if (bytesReceived != 0) {
             resip::SipMessage incomingMessage = *resip::SipMessage::make(resip::Data(buff));
             process(incomingMessage);
         }
     }
-}
-
-void SipServer::removeClient(asio::ip::udp::endpoint& client) {
-    LOG(INFO) << "Connection with " << client.address() << ":" << client.port()
-              << " is closed";
-    clients.erase(std::remove(clients.begin(), clients.end(), client), clients.end());
 }
 
 void SipServer::setPort(unsigned short port) {
@@ -251,8 +238,4 @@ unsigned short SipServer::getPort() {
 
 asio::ip::address SipServer::getNetworkInterface() {
     return networkInterface;
-}
-
-std::vector<asio::ip::udp::endpoint> SipServer::getClients() {
-    return clients;
 }
