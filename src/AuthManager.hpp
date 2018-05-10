@@ -10,6 +10,13 @@
 
 using namespace std::chrono_literals;
 
+struct SipAccount {
+    std::string name;
+    std::string pass;
+
+    operator std::string() const;
+};
+
 class Nonce {
     private:
         resip::Data mValue;
@@ -26,10 +33,18 @@ class Nonce {
 
 class AuthManager {
     public:
+        AuthManager(std::string source);
+        ~AuthManager();
         void addAuthParameters(resip::SipMessage& msg);
         bool isAuth(resip::SipMessage& msg);
 
     private:
+        void download();
+        void upload();
+
+    private:
+        std::string source;
+        std::vector<SipAccount> accounts;
         Nonce nonce;
 };
 

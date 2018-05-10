@@ -22,8 +22,9 @@ class SipServer {
         std::vector<asio::ip::udp::endpoint> clients;
 
         Registrar* registrar;
-        AuthManager authManager;
+        AuthManager* authManager;
 
+    private:
         void setPort(unsigned short port);
         void setServerIo(asio::io_service* serverIo);
         void setNetworkInterface(asio::ip::address networkInterface);

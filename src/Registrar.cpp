@@ -19,15 +19,15 @@ Registrar::Registrar(std::string&& source):
 }
 
 Registrar::Registrar(const Registrar& other):
-    source(source), accounts(accounts)
+    source(source), users(users)
 {}
 
 void Registrar::download() {
     LOG(DEBUG) << "Downloading account to registrar from " << this->source;
-    accounts.clear(); //clear if non-empty
+    users.clear(); //clear if non-empty
     std::ifstream fin(source);
 
-    if(!fin.is_open()) {
+    if (!fin.is_open()) {
         std::string description = "File " + this->source + " is damaged or not exist";
         throw ExitException(ErrorCode::ACCOUNTS_FILE_UNREACHABLE, description);
     }
@@ -36,23 +36,23 @@ void Registrar::download() {
     std::vector<std::string> buffer((std::istream_iterator<std::string>(fin)),
                                     std::istream_iterator<std::string>());
 
-    for(auto i: buffer) {
+    for (auto i: buffer) {
         std::stringstream stream(i);
         std::string temp;
         std::getline(stream, temp, ','); //split string for ',' delimiter
         std::string name = temp;
         std::getline(stream, temp);
         std::string addressString = temp;
-        accounts.push_back(SipAccount(name, addressString));
+        users.push_back(SipUser(name, addressString));
     }
 
-    if(accounts.empty()) {
+    if (users.empty()) {
         LOG(WARNING) << "Accounts list is empty";
     }
     else {
-        LOG(DEBUG) << accounts.size() << " accounts downloaded:";
-        for (auto account: accounts) {
-            LOG(DEBUG) << static_cast<std::string>(account);
+        LOG(DEBUG) << users.size() << " users downloaded:";
+        for (const auto& user: users) {
+            LOG(DEBUG) << static_cast<std::string>(user);
         }
     }
 }
@@ -66,22 +66,23 @@ void Registrar::upload() {
         std::string description = "File " + this->source + " is damaged or not exist";
         throw ExitException(ErrorCode::ACCOUNTS_FILE_UNREACHABLE,description);
     }
-    LOG(DEBUG) << accounts.size() << " accounts uploaded:";
-    for(auto account: accounts) {
-        auto accountString = static_cast<std::string>(account);
-        fout << accountString << std::endl;
-        LOG(DEBUG) << accountString;
+    LOG(DEBUG) << users.size() << " users uploaded:";
+    for(const auto& user: users) {
+        auto userString = static_cast<std::string>(user);
+        fout << userString << std::endl;
+        LOG(DEBUG) << userString;
     }
 }
-std::vector<SipAccount> Registrar::getAccounts() {
-    return accounts;
+
+std::vector<SipUser> Registrar::getUsers() {
+    return users;
 }
 
 Registrar Registrar::operator=(Registrar& other)  {
     if(this == &other)
         return *this;
     source = other.source;
-    accounts = other.accounts;
+    users = other.users;
     return *this;
 }
 
@@ -90,9 +91,9 @@ Registrar::~Registrar() {
     upload();
 }
 
-bool Registrar::addAccount(const SipAccount& account) {
-    if (std::find(accounts.begin(), accounts.end(), account) == accounts.end()) {
-        accounts.push_back(account);
+bool Registrar::addUser(const SipUser &user) {
+    if (std::find(users.begin(), users.end(), user) == users.end()) {
+        users.push_back(user);
         return true;
     }
     return false;

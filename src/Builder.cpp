@@ -33,9 +33,16 @@ Builder Builder::registrar(Registrar* registrar) {
     return *this;
 }
 
+Builder SipServer::Builder::authManager(AuthManager *authManager) {
+    sipServer->authManager = authManager;
+    return *this;
+}
+
+
 SipServer Builder::build() {
     sipServer->init();
     return *sipServer;
 }
+
 
 

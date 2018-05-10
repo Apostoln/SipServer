@@ -4,6 +4,7 @@
 #include <SipServer.hpp>
 #include <Builder.hpp>
 
+#include <AuthManager.hpp>
 #include <ExitException.hpp>
 #include <Registrar.hpp>
 #include <utils.hpp>
@@ -22,6 +23,7 @@ int main(int argc, const char* argv[]) {
     parser.addArgument("-c", "--cout", 1);
     parser.addArgument("-f", "--fileLogger", 1);
     parser.addArgument("-a", "--accounts", 1);
+    parser.addArgument("-u", "--users", 1);
     parser.parse(argc, argv);
 
     auto portArg = parser.retrieve<std::string>("port");
@@ -29,6 +31,7 @@ int main(int argc, const char* argv[]) {
     auto logLevel = getLogLevel(parser.retrieve<std::string>("logLevel"));
     bool isConsoleOut = !parser.retrieve<std::string>("cout").empty();
     auto pathToAccounts = parser.retrieve<std::string>("accounts");
+    auto pathToUsers = parser.retrieve<std::string>("users");
     auto loggingFile = parser.retrieve<std::string>("fileLogger");
 
     if (el::Level::Unknown == logLevel) {
@@ -44,6 +47,11 @@ int main(int argc, const char* argv[]) {
                    << "Trying to use default path " << DEFAULT_PATH_TO_ACCOUNTS;
         pathToAccounts = DEFAULT_PATH_TO_ACCOUNTS;
     }
+    if (pathToUsers.empty()) {
+        LOG(DEBUG) << "Path to file with users is not specified. "
+                   << "Trying to use default path " << DEFAULT_PATH_TO_USERS;
+        pathToUsers = DEFAULT_PATH_TO_USERS;
+    }
 
     configureLogger(isConsoleOut, loggingFile, logLevel);
 
@@ -58,8 +66,11 @@ int main(int argc, const char* argv[]) {
     }
 
     try {
-        Registrar* registrar = new Registrar(pathToAccounts);
-        SipServer server = sipServerBuilder.registrar(registrar).build();
+        Registrar* registrar = new Registrar(pathToUsers);
+        AuthManager* authManager = new AuthManager(pathToAccounts);
+        SipServer server = sipServerBuilder.registrar(registrar)
+                                           .authManager(authManager)
+                                           .build();
         server.run();
     }
     catch (ExitException& e) {

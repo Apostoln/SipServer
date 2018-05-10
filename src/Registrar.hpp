@@ -9,13 +9,13 @@
 #include <iterator>
 #include <sstream>
 
-#include "SipAccount.hpp"
+#include "SipUser.hpp"
 
 class Registrar {
     private:
         std::string source;
-        std::vector<SipAccount> accounts;
-        //std::unordered_map<std::string, std::string> accounts;
+        std::vector<SipUser> users;
+
     public:
         Registrar() = default;
         Registrar(std::string& source);
@@ -24,8 +24,8 @@ class Registrar {
         ~Registrar();
         void download();
         void upload();
-        bool addAccount(const SipAccount& account);
-        std::vector<SipAccount> getAccounts();
+        bool addUser(const SipUser &user);
+        std::vector<SipUser> getUsers();
         Registrar operator=(Registrar &other);
 };
 

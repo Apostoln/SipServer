@@ -4,12 +4,12 @@
 
 #include <asio/ip/udp.hpp>
 
-#include "SipAccount.hpp"
+#include "SipUser.hpp"
 
-SipAccount::SipAccount(std::string name, asio::ip::udp::endpoint endPoint):
+SipUser::SipUser(std::string name, asio::ip::udp::endpoint endPoint):
     name(name), address(endPoint) {}
 
-SipAccount::SipAccount(std::string name, std::string endPointString):
+SipUser::SipUser(std::string name, std::string endPointString):
     name(name)
 {
     std::stringstream splitter(endPointString);
@@ -23,7 +23,7 @@ SipAccount::SipAccount(std::string name, std::string endPointString):
     this->address = asio::ip::udp::endpoint(ip, port);
 }
 
-SipAccount::operator std::string() const {
+SipUser::operator std::string() const {
     std::string result = "";
     if(name.empty() && address != asio::ip::udp::endpoint()) {
         return result;
@@ -36,6 +36,6 @@ SipAccount::operator std::string() const {
     return result;
 }
 
-bool SipAccount::operator==(const SipAccount &other) {
+bool SipUser::operator==(const SipUser &other) {
     return name == other.name && address == other.address;
 }

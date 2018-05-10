@@ -1,5 +1,3 @@
-#pragma once
-
 #include <iostream>
 #include <algorithm>
 #include <type_traits>
@@ -61,7 +59,7 @@ void SipServer::onRegister(resip::SipMessage registerRequest) {
 
     // Send 401 with WWW-Authenticate
     auto response401 = *resip::Helper::makeResponse(registerRequest, 401);
-    authManager.addAuthParameters(response401);
+    authManager->addAuthParameters(response401);
 
     send(response401, userEndPoint);
 
@@ -69,21 +67,21 @@ void SipServer::onRegister(resip::SipMessage registerRequest) {
     auto registerWithAuth = receive(userEndPoint);
 
     //Check response
-    bool isAuthed = authManager.isAuth(registerWithAuth);
+    bool isAuthed = authManager->isAuth(registerWithAuth);
 
     if (isAuthed) {
         // Send 200 OK
         auto response200 = *resip::Helper::makeResponse(registerWithAuth, 200);
         send(response200, userEndPoint);
 
-        // Add to accounts
-        SipAccount account(userId, userEndPoint);
-        if (registrar->addAccount(account)) {
-            LOG(DEBUG) << "Adding account " << static_cast<std::string>(account);
+        // Add to users
+        SipUser user(userId, userEndPoint);
+        if (registrar->addUser(user)) {
+            LOG(DEBUG) << "Adding account " << static_cast<std::string>(user);
         }
     }
     else {
-        LOG(DEBUG) << "UNAUTHORIZED";
+        LOG(DEBUG) << "User is unauthorized";
         onRegister(registerWithAuth); //send 401 and process again
     }
 
@@ -120,6 +118,7 @@ SipServer::~SipServer() {
     delete(serverSocket);
     delete(serverIo);
     delete(registrar);
+    delete(authManager);
 }
 
 void SipServer::init() {

@@ -16,6 +16,7 @@ class SipServer::Builder {
         Builder networkInterface(asio::ip::address networkInterface);
         Builder networkInterface(const char* string);
         Builder registrar(Registrar* registrar);
+        Builder authManager(AuthManager* authManager);
         SipServer build();
 };
 
