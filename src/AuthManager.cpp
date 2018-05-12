@@ -2,19 +2,7 @@
 
 #include "AuthManager.hpp"
 #include "ExitException.hpp"
-
-
-SipAccount::operator std::string() const {
-    std::string result = "";
-    result += name;
-    result += ",";
-    result += pass;
-    return result;
-}
-
-bool SipAccount::operator==(const std::string &other) {
-    return name == other;
-}
+#include "SipAccount.hpp"
 
 void Nonce::generateNonce() {
     // crutch

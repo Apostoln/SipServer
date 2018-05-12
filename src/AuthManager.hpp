@@ -7,16 +7,9 @@
 #include <resip/stack/Helper.hxx>
 #include <rutil/Data.hxx>
 
+#include <SipAccount.hpp>
 
 using namespace std::chrono_literals;
-
-struct SipAccount {
-    std::string name;
-    std::string pass;
-
-    operator std::string() const;
-    bool operator ==(const std::string& other);
-};
 
 class Nonce {
     private:

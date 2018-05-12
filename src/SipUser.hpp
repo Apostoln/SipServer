@@ -1,6 +1,6 @@
 #pragma once
-#ifndef SIPSERVER_SIPACCOUNT_HPP
-#define SIPSERVER_SIPACCOUNT_HPP
+#ifndef SIPSERVER_SIPUSER_HPP
+#define SIPSERVER_SIPUSER_HPP
 
 #include <asio/ip/udp.hpp>
 
@@ -16,4 +16,4 @@ struct SipUser {
     bool operator ==(const SipUser& other);
 };
 
-#endif //SIPSERVER_SIPACCOUNT_HPP
+#endif //SIPSERVER_SIPUSER_HPP
