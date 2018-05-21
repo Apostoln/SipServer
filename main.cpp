@@ -1,6 +1,10 @@
 #include <argparse.hpp>
 #include <easylogging++.h>
 
+
+#include <sqlite3.h>
+#include <sqlite_orm.h>
+
 #include <SipServer.hpp>
 #include <Builder.hpp>
 
@@ -9,6 +13,9 @@
 #include <Registrar.hpp>
 #include <utils.hpp>
 #include <constants.hpp>
+
+#include <Db.hpp>
+
 
 INITIALIZE_EASYLOGGINGPP //crutch for logger
 
@@ -23,7 +30,7 @@ int main(int argc, const char* argv[]) {
     parser.addArgument("-c", "--cout", 1);
     parser.addArgument("-f", "--fileLogger", 1);
     parser.addArgument("-a", "--accounts", 1);
-    parser.addArgument("-u", "--users", 1);
+    parser.addArgument("-d", "--database", 1);
     parser.parse(argc, argv);
 
     auto portArg = parser.retrieve<std::string>("port");
@@ -31,7 +38,7 @@ int main(int argc, const char* argv[]) {
     auto logLevel = getLogLevel(parser.retrieve<std::string>("logLevel"));
     bool isConsoleOut = !parser.retrieve<std::string>("cout").empty();
     auto pathToAccounts = parser.retrieve<std::string>("accounts");
-    auto pathToUsers = parser.retrieve<std::string>("users");
+    auto pathToDb = parser.retrieve<std::string>("database");
     auto loggingFile = parser.retrieve<std::string>("fileLogger");
 
     if (el::Level::Unknown == logLevel) {
@@ -47,10 +54,10 @@ int main(int argc, const char* argv[]) {
                    << "Trying to use default path " << DEFAULT_PATH_TO_ACCOUNTS;
         pathToAccounts = DEFAULT_PATH_TO_ACCOUNTS;
     }
-    if (pathToUsers.empty()) {
-        LOG(DEBUG) << "Path to file with users is not specified. "
-                   << "Trying to use default path " << DEFAULT_PATH_TO_USERS;
-        pathToUsers = DEFAULT_PATH_TO_USERS;
+
+    if (pathToDb.empty()) {
+        LOG(ERROR) << "Path to db isn't specified";
+        return 1;
     }
 
     configureLogger(isConsoleOut, loggingFile, logLevel);
@@ -66,8 +73,10 @@ int main(int argc, const char* argv[]) {
     }
 
     try {
-        Registrar* registrar = new Registrar(pathToUsers);
-        AuthManager* authManager = new AuthManager(pathToAccounts);
+        std::cout << pathToDb << std::endl;
+        Db* db = new Db(pathToDb); //TODO: use smart ptr
+        Registrar* registrar = new Registrar(db);
+        AuthManager* authManager = new AuthManager(pathToAccounts); //TODO: use DB
         SipServer server = sipServerBuilder.registrar(registrar)
                                            .authManager(authManager)
                                            .build();

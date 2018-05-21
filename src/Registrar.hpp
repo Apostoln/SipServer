@@ -10,23 +10,16 @@
 #include <sstream>
 
 #include "SipUser.hpp"
+#include "Db.hpp"
 
 class Registrar {
     private:
-        std::string source;
-        std::vector<SipUser> users;
+        Db* db;
 
     public:
-        Registrar() = default;
-        Registrar(std::string& source);
-        Registrar(std::string&& source);
-        Registrar(const Registrar &other);
+        Registrar(Db* db);
         ~Registrar();
-        void download();
-        void upload();
         bool addUser(const SipUser &user);
-        std::vector<SipUser> getUsers();
-        Registrar operator=(Registrar &other);
 };
 
 #endif //SIPSERVER_REGISTRAR_HPP
