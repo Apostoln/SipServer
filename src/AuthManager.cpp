@@ -51,7 +51,7 @@ bool AuthManager::isAuth(resip::SipMessage& msg) {
 
     auto accounts = db->storage.get_all<User>(where(c(&User::name) == usernameString));
     if (accounts.empty()) {
-        LOG(DEBUG) << "Account " << username  << " is not found";
+        LOG(WARNING) << "Account " << username  << " is not found";
         return false;
     }
 

@@ -39,7 +39,8 @@ inline auto initStorage(const std::string& path) {
                                                        autoincrement(),
                                                        primary_key()),
                                            make_column("address",
-                                                       &Location::address),
+                                                       &Location::address,
+                                                       unique()),
                                            make_column("expired",
                                                        &Location::expired),
                                            make_column("user",
@@ -59,6 +60,23 @@ class Db {
         Db(const std::string& path):
             storage(initStorage(path)) {
             LOG(DEBUG) << "Init storage in db " << path;
+            auto result = storage.sync_schema(true);
+            for (auto& schema : result) {
+                LOG(DEBUG) << schema.first << ": " << schema.second;
+            }
+
+            initUsers();
+
+        }
+    private:
+        void initUsers() {
+            try {
+                auto id = storage.insert(User{0, "123", "zzzxxx123"});
+            }
+            catch (std::system_error& se) {
+                //TODO: check error_code or error_category
+                LOG(ERROR) << se.code() << " " << se.what();
+            }
         }
 };
 

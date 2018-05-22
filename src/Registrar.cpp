@@ -24,6 +24,7 @@ bool Registrar::addUser(const SipUser &user) {
 
     auto usersWithSuchName = db->storage.get_all<User>(where(c(&User::name) == user.name));
     if (usersWithSuchName.empty() || usersWithSuchName.size() > 1 ) {
+        LOG(ERROR) << "No user in db with name " << user.name;
         return false;
     }
     auto userId = usersWithSuchName[0].id;
@@ -33,6 +34,7 @@ bool Registrar::addUser(const SipUser &user) {
         db->storage.insert(location);
     }
     catch (std::system_error&) {
+        //check if already present
         return false;
     }
     return true;
