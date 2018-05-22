@@ -29,5 +29,11 @@ bool Registrar::addUser(const SipUser &user) {
     auto userId = usersWithSuchName[0].id;
 
     Location location {0, oss.str(), dumpTimeStamp, userId };
-    return db->storage.insert(location);
+    try {
+        db->storage.insert(location);
+    }
+    catch(std::system_error&) {
+        return false;
+    }
+    return true;
 }
