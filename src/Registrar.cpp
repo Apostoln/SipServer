@@ -32,7 +32,7 @@ bool Registrar::addUser(const SipUser &user) {
     try {
         db->storage.insert(location);
     }
-    catch(std::system_error&) {
+    catch (std::system_error&) {
         return false;
     }
     return true;

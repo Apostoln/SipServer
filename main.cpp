@@ -29,7 +29,6 @@ int main(int argc, const char* argv[]) {
     parser.addArgument("-l", "--logLevel", 1);
     parser.addArgument("-c", "--cout", 1);
     parser.addArgument("-f", "--fileLogger", 1);
-    parser.addArgument("-a", "--accounts", 1);
     parser.addArgument("-d", "--database", 1);
     parser.parse(argc, argv);
 
@@ -37,7 +36,6 @@ int main(int argc, const char* argv[]) {
     auto networkInterfaceArg = parser.retrieve<std::string>("networkInterface");
     auto logLevel = getLogLevel(parser.retrieve<std::string>("logLevel"));
     bool isConsoleOut = !parser.retrieve<std::string>("cout").empty();
-    auto pathToAccounts = parser.retrieve<std::string>("accounts");
     auto pathToDb = parser.retrieve<std::string>("database");
     auto loggingFile = parser.retrieve<std::string>("fileLogger");
 
@@ -48,11 +46,6 @@ int main(int argc, const char* argv[]) {
     if (loggingFile.empty()) {
         LOG(DEBUG) << "Log file is not specified. Default path to log file is used: " << DEFAULT_LOG_FILE_PATH;
         loggingFile = DEFAULT_LOG_FILE_PATH;
-    }
-    if (pathToAccounts.empty()) {
-        LOG(DEBUG) << "Path to file with accounts is not specified. "
-                   << "Trying to use default path " << DEFAULT_PATH_TO_ACCOUNTS;
-        pathToAccounts = DEFAULT_PATH_TO_ACCOUNTS;
     }
 
     if (pathToDb.empty()) {
@@ -76,7 +69,7 @@ int main(int argc, const char* argv[]) {
         std::cout << pathToDb << std::endl;
         Db* db = new Db(pathToDb); //TODO: use smart ptr
         Registrar* registrar = new Registrar(db);
-        AuthManager* authManager = new AuthManager(pathToAccounts); //TODO: use DB
+        AuthManager* authManager = new AuthManager(db);
         SipServer server = sipServerBuilder.registrar(registrar)
                                            .authManager(authManager)
                                            .build();

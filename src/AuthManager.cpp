@@ -23,68 +23,13 @@ resip::Data Nonce::getValue() {
     return mValue;
 }
 
-AuthManager::AuthManager(std::string source):
-        source(source)
-{
-    download();
+AuthManager::AuthManager(Db* db):
+        db(db) {
 }
 
 AuthManager::~AuthManager() {
-    upload();
 }
 
-
-void AuthManager::download() {
-    LOG(DEBUG) << "Downloading account to registrar from " << this->source;
-    accounts.clear(); //clear if non-empty
-    std::ifstream fin(source);
-
-    if (!fin.is_open()) {
-        std::string description = "File " + this->source + " is damaged or not exist";
-        throw ExitException(ErrorCode::ACCOUNTS_FILE_UNREACHABLE, description);
-    }
-
-    //read file to buffer
-    std::vector<std::string> buffer((std::istream_iterator<std::string>(fin)),
-                                    std::istream_iterator<std::string>());
-
-    for (auto i: buffer) {
-        std::stringstream stream(i);
-        std::string temp;
-        std::getline(stream, temp, ','); //split string for ',' delimiter
-        std::string name = temp;
-        std::getline(stream, temp);
-        std::string pass = temp;
-        accounts.push_back(SipAccount{name, pass}); //TODO: parse pass
-    }
-
-    if (accounts.empty()) {
-        LOG(WARNING) << "Accounts list is empty";
-    }
-    else {
-        LOG(DEBUG) << accounts.size() << " accounts downloaded:";
-        for (const auto& account: accounts) {
-            LOG(DEBUG) << static_cast<std::string>(account);
-        }
-    }
-}
-
-void AuthManager::upload() {
-    LOG(DEBUG) << "Uploading account to " << this->source << " from registrar";
-
-    //rewrite file
-    std::ofstream fout(source);
-    if(!fout.is_open()) {
-        std::string description = "File " + this->source + " is damaged or not exist";
-        throw ExitException(ErrorCode::ACCOUNTS_FILE_UNREACHABLE,description);
-    }
-    LOG(DEBUG) << accounts.size() << " users uploaded:";
-    for(const auto& account: accounts) {
-        auto accountString = static_cast<std::string>(account);
-        fout << accountString << std::endl;
-        LOG(DEBUG) << accountString;
-    }
-}
 
 void AuthManager::addAuthParameters(resip::SipMessage& msg) {
     resip::Auth auth;
@@ -103,13 +48,14 @@ bool AuthManager::isAuth(resip::SipMessage& msg) {
 
     auto username = authHeader.param(resip::p_username);
     std::string usernameString(username.c_str());
-    auto it = std::find(accounts.begin(), accounts.end(), usernameString);
-    if (it == accounts.end()) {
+
+    auto accounts = db->storage.get_all<User>(where(c(&User::name) == usernameString));
+    if (accounts.empty()) {
         LOG(DEBUG) << "Account " << username  << " is not found";
         return false;
     }
 
-    const char* password = it->pass.c_str();
+    const char* password = accounts.at(0).password.c_str();
     auto realm = authHeader.param(resip::p_realm);
     auto method = getMethodName(msg.method());
     auto uri = authHeader.param(resip::p_uri);

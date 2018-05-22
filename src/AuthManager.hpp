@@ -8,7 +8,7 @@
 #include <rutil/Data.hxx>
 
 #include <SipAccount.hpp>
-
+#include <Db.hpp>
 using namespace std::chrono_literals;
 
 class Nonce {
@@ -27,18 +27,13 @@ class Nonce {
 
 class AuthManager {
     public:
-        AuthManager(std::string source);
+        AuthManager(Db* db);
         ~AuthManager();
         void addAuthParameters(resip::SipMessage& msg);
         bool isAuth(resip::SipMessage& msg);
 
     private:
-        void download();
-        void upload();
-
-    private:
-        std::string source;
-        std::vector<SipAccount> accounts;
+        Db* db;
         Nonce nonce;
 };
 
