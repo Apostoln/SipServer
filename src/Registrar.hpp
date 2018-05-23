@@ -14,10 +14,10 @@
 
 class Registrar {
     private:
-        Db* db;
+        std::shared_ptr<Db> db;
 
     public:
-        Registrar(Db* db);
+        Registrar(std::shared_ptr<Db> db);
         ~Registrar();
         bool addUser(const SipUser &user);
 };

@@ -8,7 +8,7 @@
 #include "ExitException.hpp"
 
 
-Registrar::Registrar(Db* db):
+Registrar::Registrar(std::shared_ptr<Db> db):
     db(db) {
 }
 

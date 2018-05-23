@@ -27,13 +27,13 @@ class Nonce {
 
 class AuthManager {
     public:
-        AuthManager(Db* db);
+        AuthManager(std::shared_ptr<Db> db);
         ~AuthManager();
         void addAuthParameters(resip::SipMessage& msg);
         bool isAuth(resip::SipMessage& msg);
 
     private:
-        Db* db;
+        std::shared_ptr<Db> db;
         Nonce nonce;
 };
 

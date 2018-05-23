@@ -67,7 +67,7 @@ int main(int argc, const char* argv[]) {
 
     try {
         std::cout << pathToDb << std::endl;
-        Db* db = new Db(pathToDb); //TODO: use smart ptr
+        auto db = std::make_shared<Db>(pathToDb);
         Registrar* registrar = new Registrar(db);
         AuthManager* authManager = new AuthManager(db);
         SipServer server = sipServerBuilder.registrar(registrar)

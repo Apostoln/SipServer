@@ -23,7 +23,7 @@ resip::Data Nonce::getValue() {
     return mValue;
 }
 
-AuthManager::AuthManager(Db* db):
+AuthManager::AuthManager(std::shared_ptr<Db> db):
         db(db) {
 }
 
