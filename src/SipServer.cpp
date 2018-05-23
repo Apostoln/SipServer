@@ -17,6 +17,7 @@ using namespace std::string_literals;
 #include <ExitException.hpp>
 #include <ErrorCode.hpp>
 #include <Registrar.hpp>
+#include <thread>
 
 std::string toString(resip::SipMessage msg) {
     std::ostringstream oss;
@@ -215,7 +216,11 @@ void SipServer::run() {
 
         if (bytesReceived != 0) {
             resip::SipMessage incomingMessage = *resip::SipMessage::make(resip::Data(buff));
-            process(incomingMessage);
+            std::thread worker([&](){
+                process(incomingMessage);
+            });
+            //std::thread worker(&SipServer::process, this, incomingMessage);
+            worker.join();
         }
     }
 }
