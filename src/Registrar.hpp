@@ -15,6 +15,7 @@
 class Registrar {
     private:
         std::shared_ptr<Db> db;
+        static constexpr size_t DEFAULT_EXPIRED = 3600;
 
     public:
         Registrar(std::shared_ptr<Db> db);

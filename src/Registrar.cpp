@@ -20,7 +20,7 @@ bool Registrar::addUser(const SipUser &user) {
     std::ostringstream oss; //string with address
     oss << user.address;
 
-    size_t dumpTimeStamp = 42; //TODO: todo
+    size_t dumpTimeStamp = DEFAULT_EXPIRED; //todo:implement expired
 
     auto usersWithSuchName = db->storage.get_all<User>(where(c(&User::name) == user.name));
     if (usersWithSuchName.empty() || usersWithSuchName.size() > 1 ) {
