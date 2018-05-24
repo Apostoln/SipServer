@@ -48,7 +48,7 @@ class SipServer {
         void onRegister(resip::SipMessage registerRequest);
 
         bool send(resip::SipMessage msg, asio::ip::udp::endpoint to);
-        resip::SipMessage receive(asio::ip::udp::endpoint from);
+        std::shared_ptr<resip::SipMessage> receive(asio::ip::udp::endpoint from);
 
         unsigned short getPort();
         asio::ip::address getNetworkInterface();

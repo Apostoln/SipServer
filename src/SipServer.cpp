@@ -35,7 +35,7 @@ bool SipServer::send(resip::SipMessage msg, asio::ip::udp::endpoint to) {
     return bytesSent > 0;
 }
 
-resip::SipMessage SipServer::receive(asio::ip::udp::endpoint from) {
+std::shared_ptr<resip::SipMessage> SipServer::receive(asio::ip::udp::endpoint from) {
     char buff[4096] = {0};
     //Amount of received bytes
     size_t bytesReceived = serverSocket->receive_from(asio::buffer(buff),
@@ -47,8 +47,7 @@ resip::SipMessage SipServer::receive(asio::ip::udp::endpoint from) {
               << from.port() << " > " << std::endl
               << buff;
 
-    return *resip::SipMessage::make(data);
-
+    return std::shared_ptr<resip::SipMessage>(resip::SipMessage::make(data)); //TODO memory leak
 }
 
 void SipServer::onRegister(resip::SipMessage registerRequest) {
@@ -65,7 +64,7 @@ void SipServer::onRegister(resip::SipMessage registerRequest) {
     send(response401, userEndPoint);
 
     // Receive register with Authorization
-    auto registerWithAuth = receive(userEndPoint);
+    auto registerWithAuth = *receive(userEndPoint);
 
     //Check response
     bool isAuthed = authManager->isAuth(registerWithAuth);
@@ -206,20 +205,11 @@ void SipServer::run() {
     LOG(INFO) << "Listening UDP port " << this->getPort();
 
     while(true) {
-        char buff[4096] = {0};
-        //Amount of received bytes
-        size_t bytesReceived = serverSocket->receive_from(asio::buffer(buff), clientEndPoint);
-        LOG(INFO) << bytesReceived << " bytes received: ";
-        LOG(INFO) << clientEndPoint.address() << ":"
-                  << clientEndPoint.port() << " > "
-                  << buff;
-
-        if (bytesReceived != 0) {
-            resip::SipMessage incomingMessage = *resip::SipMessage::make(resip::Data(buff));
+        auto incomingMessage = receive(clientEndPoint);
+        if (nullptr != incomingMessage) {
             std::thread worker([&](){
-                process(incomingMessage);
+                process(*incomingMessage);
             });
-            //std::thread worker(&SipServer::process, this, incomingMessage);
             worker.join();
         }
     }
