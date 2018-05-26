@@ -12,16 +12,7 @@
 
 #include <Registrar.hpp>
 #include <AuthManager.hpp>
-
-namespace std { //TODO: move to utils
-    template <> struct hash<resip::CallId>
-    {
-        size_t operator()(const resip::CallId &x) const
-        {
-            return hash<string>()(string(x.value().c_str()));
-        }
-    };
-}
+#include <hash.hpp>
 
 class SipServer {
     private:
