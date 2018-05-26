@@ -247,7 +247,7 @@ void SipServer::run() {
 
             if (dialogs.find(callId) == dialogs.end()) {
                 LOG(DEBUG) << "No dialog found for " << callId.value() << " , create new one";
-                //TODO: Create new dialog in dialogs explicitly.
+                dialogs[callId] = {};
                 std::thread worker([=]() {
                     LOG(DEBUG) << "New thread run, id = " << std::this_thread::get_id();
                     process(*incomingMessage);
