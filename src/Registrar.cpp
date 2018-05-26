@@ -33,9 +33,10 @@ bool Registrar::addUser(const SipUser &user) {
     try {
         db->storage.insert(location);
     }
-    catch (std::system_error&) {
-        //check if already present
-        //TODO: logging
+    catch (std::system_error& e) {
+        //TODO: check if already present
+        LOG(WARNING) << "Error while adding record to locations"
+                  << e.code() << ": " << e.what();
         return false;
     }
     return true;

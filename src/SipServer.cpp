@@ -68,7 +68,7 @@ std::shared_ptr<resip::SipMessage> SipServer::receive(resip::CallId callId) {
 void SipServer::onRegister(resip::SipMessage registerRequest) {
     LOG(DEBUG) << "onRegister scenario";
     auto uri = registerRequest.header(resip::h_Contacts).front().uri();
-    std::string userId = uri.user().c_str(); //TODO get username from uri not from username
+    std::string userId = uri.user().c_str();
     std::string senderIp = uri.host().c_str();
     auto senderPort = uri.port();
     asio::ip::udp::endpoint userEndPoint(asio::ip::address::from_string(senderIp), senderPort);
