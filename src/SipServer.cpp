@@ -48,9 +48,7 @@ std::shared_ptr<resip::SipMessage> SipServer::receive(asio::ip::udp::endpoint fr
               << from.port() << " > " << std::endl
               << buff;
 
-    auto msgPtr = std::shared_ptr<resip::SipMessage>(resip::SipMessage::make(data)); //TODO check memory leak
-    return msgPtr;
-
+    return std::shared_ptr<resip::SipMessage>(resip::SipMessage::make(data));
 }
 
 std::shared_ptr<resip::SipMessage> SipServer::receive(resip::CallId callId) {
