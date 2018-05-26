@@ -117,7 +117,6 @@ void SipServer::process(resip::SipMessage& incomingMessage) {
         onRegister(incomingMessage);
         return;
     }
-    //TODO: remove dialog
 }
 
 SipServer::SipServer():
@@ -251,6 +250,7 @@ void SipServer::run() {
                 std::thread worker([=]() {
                     LOG(DEBUG) << "New thread run, id = " << std::this_thread::get_id();
                     process(*incomingMessage);
+                    dialogs.erase(callId); // TODO: Can I refactor this using RAII?
                 });
                 worker.detach();
             }
