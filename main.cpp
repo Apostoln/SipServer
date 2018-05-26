@@ -1,4 +1,9 @@
 #include <argparse.hpp>
+
+// Macro for enabling thread-sage mode of logger must be defined
+// before compilation or inside easylogging++.h
+// #define ELPP_THREAD_SAFE
+// #define ELPP_NO_DEFAULT_LOG_FILE
 #include <easylogging++.h>
 
 
