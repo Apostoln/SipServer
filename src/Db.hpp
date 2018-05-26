@@ -71,7 +71,7 @@ class Db {
     private:
         void initUsers() {
             try {
-                auto id = storage.insert(User{0, "123", "zzzxxx123"});
+                auto id = storage.replace(User{0, "123", "zzzxxx123"});
             }
             catch (std::system_error& se) {
                 //TODO: check error_code or error_category
