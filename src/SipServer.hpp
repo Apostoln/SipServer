@@ -8,10 +8,20 @@
 #include <asio/ip/udp.hpp>
 
 #include <resip/stack/SipMessage.hxx>
+#include <resip/stack/CallId.hxx>
 
 #include <Registrar.hpp>
 #include <AuthManager.hpp>
 
+namespace std { //TODO: move to utils
+    template <> struct hash<resip::CallId>
+    {
+        size_t operator()(const resip::CallId &x) const
+        {
+            return hash<string>()(string(x.value().c_str()));
+        }
+    };
+}
 
 class SipServer {
     private:
@@ -19,6 +29,9 @@ class SipServer {
         asio::ip::udp::socket* serverSocket;
         unsigned short port;
         asio::ip::address networkInterface;
+
+        using MessagesQueue = std::vector<resip::SipMessage>;
+        std::unordered_map<resip::CallId, MessagesQueue> dialogs;
 
         Registrar* registrar;
         AuthManager* authManager;
@@ -49,6 +62,7 @@ class SipServer {
 
         bool send(resip::SipMessage msg, asio::ip::udp::endpoint to);
         std::shared_ptr<resip::SipMessage> receive(asio::ip::udp::endpoint from);
+        std::shared_ptr<resip::SipMessage> receive(resip::CallId callId);
 
         unsigned short getPort();
         asio::ip::address getNetworkInterface();

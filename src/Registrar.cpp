@@ -35,6 +35,7 @@ bool Registrar::addUser(const SipUser &user) {
     }
     catch (std::system_error&) {
         //check if already present
+        //TODO: logging
         return false;
     }
     return true;

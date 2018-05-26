@@ -38,6 +38,7 @@ bool SipServer::send(resip::SipMessage msg, asio::ip::udp::endpoint to) {
 std::shared_ptr<resip::SipMessage> SipServer::receive(asio::ip::udp::endpoint from) {
     char buff[4096] = {0};
     //Amount of received bytes
+    LOG(DEBUG) << "Wait receiving new message from network";
     size_t bytesReceived = serverSocket->receive_from(asio::buffer(buff),
                                                       from);
     resip::Data data(buff);
@@ -47,15 +48,32 @@ std::shared_ptr<resip::SipMessage> SipServer::receive(asio::ip::udp::endpoint fr
               << from.port() << " > " << std::endl
               << buff;
 
-    return std::shared_ptr<resip::SipMessage>(resip::SipMessage::make(data)); //TODO memory leak
+    auto msgPtr = std::shared_ptr<resip::SipMessage>(resip::SipMessage::make(data)); //TODO check memory leak
+    return msgPtr;
+
+}
+
+std::shared_ptr<resip::SipMessage> SipServer::receive(resip::CallId callId) {
+    LOG(DEBUG) << "Receive message from incoming queue by callId " << callId.value();
+    MessagesQueue& messages = dialogs[callId];
+    LOG(DEBUG) << "Start waiting";
+    while (messages.empty()) ; //wait receiving message //TODO timeout
+    LOG(DEBUG) << "End waiting";
+    auto result = messages.back();
+    LOG(DEBUG) << "Received message from incoming queue:\n" << toString(result) ;
+    messages.pop_back();
+    return std::shared_ptr<resip::SipMessage>(new resip::SipMessage(result));
 }
 
 void SipServer::onRegister(resip::SipMessage registerRequest) {
+    LOG(DEBUG) << "onRegister scenario";
     auto uri = registerRequest.header(resip::h_Contacts).front().uri();
-    std::string userId = uri.user().c_str();
+    std::string userId = uri.user().c_str(); //TODO get username from uri not from username
     std::string senderIp = uri.host().c_str();
     auto senderPort = uri.port();
     asio::ip::udp::endpoint userEndPoint(asio::ip::address::from_string(senderIp), senderPort);
+
+    resip::CallId callId = registerRequest.header(resip::h_CallId);
 
     // Send 401 with WWW-Authenticate
     auto response401 = *resip::Helper::makeResponse(registerRequest, 401);
@@ -64,7 +82,7 @@ void SipServer::onRegister(resip::SipMessage registerRequest) {
     send(response401, userEndPoint);
 
     // Receive register with Authorization
-    auto registerWithAuth = *receive(userEndPoint);
+    auto registerWithAuth = *receive(callId);
 
     //Check response
     bool isAuthed = authManager->isAuth(registerWithAuth);
@@ -79,20 +97,27 @@ void SipServer::onRegister(resip::SipMessage registerRequest) {
         if (registrar->addUser(user)) {
             LOG(DEBUG) << "Adding account " << static_cast<std::string>(user);
         }
+        else {
+            //TODO: Response with 404 Not Found and 200OK only after adding user not before
+            //TODO: Case when user already registered on this location
+        }
     }
     else {
         LOG(DEBUG) << "User is unauthorized";
         onRegister(registerWithAuth); //send 401 and process again
+        //TODO: Test this case
     }
 
 }
 
 void SipServer::process(resip::SipMessage& incomingMessage) {
+    LOG(DEBUG) << "process() ";
     if (resip::REGISTER == incomingMessage.method() ) {
         LOG(DEBUG) << "REGISTER method is observed";
         onRegister(incomingMessage);
         return;
     }
+    //TODO: remove dialog
 }
 
 SipServer::SipServer():
@@ -197,7 +222,7 @@ void SipServer::updateSocket() {
 }
 
 void SipServer::run() {
-    asio::ip::udp::endpoint clientEndPoint;
+    asio::ip::udp::endpoint clientEndPoint; // TODO: Move into main loop?
 
     std::cout << "Server is started" << std::endl
               << "Listening UDP port " << this->getPort() << std::endl;
@@ -206,11 +231,36 @@ void SipServer::run() {
 
     while(true) {
         auto incomingMessage = receive(clientEndPoint);
+
         if (nullptr != incomingMessage) {
-            std::thread worker([&](){
-                process(*incomingMessage);
-            });
-            worker.join();
+            resip::CallId callId = incomingMessage->header(resip::h_CallId);
+
+            if (dialogs.empty()) {
+                LOG(DEBUG) << "Dialogs are empty";
+            }
+            else {
+                LOG(DEBUG) << "Dialog : size"; //TODO: remove
+                for (auto &i: dialogs) {
+                    LOG(DEBUG) << i.first << " : " << i.second.size();
+                }
+            }
+
+            if (dialogs.find(callId) == dialogs.end()) {
+                LOG(DEBUG) << "No dialog found for " << callId.value() << " , create new one";
+                //TODO: Create new dialog in dialogs explicitly.
+                std::thread worker([=]() {
+                    LOG(DEBUG) << "New thread run, id = " << std::this_thread::get_id();
+                    process(*incomingMessage);
+                });
+                worker.detach();
+            }
+            else {
+                LOG(DEBUG) << "Add message to dialog " << callId.value();
+                dialogs[callId].push_back(*incomingMessage);
+            }
+        }
+        else {
+            LOG(ERROR) << "Incoming message is incorrect";
         }
     }
 }
