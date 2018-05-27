@@ -71,6 +71,3 @@ AuthResult AuthManager::isAuth(resip::SipMessage& msg) {
            ? AuthResult::OK
            : AuthResult::DIGEST_FAILED;
 }
-
-
-

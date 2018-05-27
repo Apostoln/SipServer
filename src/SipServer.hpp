@@ -51,7 +51,11 @@ class SipServer {
         asio::ip::udp::endpoint makeEndPoint(resip::NameAddr contact);
 
         void onRegister(resip::SipMessage registerRequest);
+        void onInvite(resip::SipMessage inviteRequest);
         void onUnsupported(resip::SipMessage unsupportedRequest);
+
+        template <typename F>
+        void onAuth(resip::SipMessage request, asio::ip::udp::endpoint userEndPoint, F onSuccessAuthFunc);
 
         bool send(resip::SipMessage msg, asio::ip::udp::endpoint to);
         std::shared_ptr<resip::SipMessage> receive(asio::ip::udp::endpoint from);

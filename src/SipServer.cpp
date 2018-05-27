@@ -71,6 +71,44 @@ std::shared_ptr<resip::SipMessage> SipServer::receive(resip::CallId callId) {
     return std::shared_ptr<resip::SipMessage>(new resip::SipMessage(result));
 }
 
+//generalized auth scenarion
+template <typename F>
+void SipServer::onAuth(resip::SipMessage request, asio::ip::udp::endpoint userEndPoint, F onSuccessAuthFunc) {
+    LOG(DEBUG) << "onAuth for " << request.methodStr();
+    resip::CallId callId = request.header(resip::h_CallId);
+    resip::NameAddr contact = request.header(resip::h_Contacts).front();
+
+    // Send 401 with WWW-Authenticate
+    auto response401 = *resip::Helper::makeResponse(request, 401, contact);
+    authManager->addAuthParameters(response401);
+    send(response401, userEndPoint);
+
+    // Receive register with Authorization
+    auto requestWithAuth = *receive(callId);
+
+    //Check response
+    AuthResult authResult = authManager->isAuth(requestWithAuth);
+    switch (authResult) {
+        case AuthResult::OK: {
+            // Do some specific for each scenario on successful auth
+            onSuccessAuthFunc(requestWithAuth);
+            break;
+        }
+        case AuthResult::USER_NOT_FOUND: {
+            // Send 404 User not found
+            auto response404 = *resip::Helper::makeResponse(requestWithAuth, 404, contact);
+            send(response404, userEndPoint);
+            break;
+        }
+        case AuthResult::DIGEST_FAILED: {
+            //send 401 and process again
+            LOG(DEBUG) << "User is unauthorized";
+            onAuth(requestWithAuth, userEndPoint, onSuccessAuthFunc);
+            break;
+        }
+    }
+}
+
 void SipServer::onRegister(resip::SipMessage registerRequest) {
     LOG(DEBUG) << "onRegister scenario";
     resip::NameAddr contact = registerRequest.header(resip::h_Contacts).front();
@@ -79,45 +117,29 @@ void SipServer::onRegister(resip::SipMessage registerRequest) {
 
     resip::CallId callId = registerRequest.header(resip::h_CallId);
 
-    // Send 401 with WWW-Authenticate
-    auto response401 = *resip::Helper::makeResponse(registerRequest, 401, contact);
-    authManager->addAuthParameters(response401);
-
-    send(response401, userEndPoint);
-
-    // Receive register with Authorization
-    auto registerWithAuth = *receive(callId);
-
-    //Check response
-    AuthResult authResult = authManager->isAuth(registerWithAuth);
-    switch (authResult) {
-        case AuthResult::OK: {
-            // Add to users and send 200 OK
-            SipUser user(userId, userEndPoint);
-            if (registrar->addUser(user)) {
-                LOG(DEBUG) << "Adding account " << static_cast<std::string>(user);
-                // Send 200 OK
-                auto response200 = *resip::Helper::makeResponse(registerWithAuth, 200, contact);
-                send(response200, userEndPoint);
-            }
-            else {
-                LOG(ERROR) << "Error adding user to db";
-            }
-            break;
+    auto onSuccessfullRegisterAuth = [=](resip::SipMessage registerWithAuth ){
+        // Add to users and send 200 OK
+        SipUser user(userId, userEndPoint);
+        if (registrar->addUser(user)) {
+            LOG(DEBUG) << "Adding account " << static_cast<std::string>(user);
+            // Send 200 OK
+            auto response200 = *resip::Helper::makeResponse(registerWithAuth, 200, contact);
+            send(response200, userEndPoint);
         }
-        case AuthResult::USER_NOT_FOUND: {
-            // Send 404 User not found
-            auto response404 = *resip::Helper::makeResponse(registerWithAuth, 404, contact);
-            send(response404, userEndPoint);
-            break;
+        else {
+            LOG(ERROR) << "Error adding user to db";
         }
-        case AuthResult::DIGEST_FAILED: {
-            //send 401 and process again
-            LOG(DEBUG) << "User is unauthorized";
-            onRegister(registerWithAuth);
-            break;
-        }
-    }
+    };
+    onAuth(registerRequest, userEndPoint, onSuccessfullRegisterAuth);
+}
+
+void SipServer::onInvite(resip::SipMessage inviteRequest) {
+    LOG(DEBUG) << "onInvite scenario";
+    resip::NameAddr contact = inviteRequest.header(resip::h_Contacts).front();
+    std::string cliId = contact.uri().user().c_str();
+    auto cliEndPoint = makeEndPoint(contact);
+
+    onAuth(inviteRequest, cliEndPoint, [](resip::SipMessage){});
 }
 
 void SipServer::onUnsupported(resip::SipMessage unsupportedRequest) {
@@ -132,8 +154,13 @@ void SipServer::onUnsupported(resip::SipMessage unsupportedRequest) {
 void SipServer::process(resip::SipMessage& incomingMessage) {
     LOG(DEBUG) << "process() ";
     if (resip::REGISTER == incomingMessage.method() ) {
-        LOG(DEBUG) << "REGISTER method is observed";
+        LOG(DEBUG) << incomingMessage.methodStr() << " method is observed";
         onRegister(incomingMessage);
+        return;
+    }
+    else if (resip::INVITE == incomingMessage.method()) {
+        LOG(DEBUG) << incomingMessage.methodStr() << " method is observed";
+        onInvite(incomingMessage);
         return;
     }
     else {
