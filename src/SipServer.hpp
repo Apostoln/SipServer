@@ -48,8 +48,10 @@ class SipServer {
         void changeServerIo(asio::io_service* serverIo);
         void changeNetworkInterface(asio::ip::address networkInterface);
 
+        asio::ip::udp::endpoint makeEndPoint(resip::NameAddr contact);
 
         void onRegister(resip::SipMessage registerRequest);
+        void onUnsupported(resip::SipMessage unsupportedRequest);
 
         bool send(resip::SipMessage msg, asio::ip::udp::endpoint to);
         std::shared_ptr<resip::SipMessage> receive(asio::ip::udp::endpoint from);

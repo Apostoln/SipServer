@@ -25,6 +25,14 @@ std::string toString(resip::SipMessage msg) {
     return oss.str();
 }
 
+asio::ip::udp::endpoint SipServer::makeEndPoint(resip::NameAddr contact) {
+    auto uri = contact.uri();
+    std::string senderIp = uri.host().c_str();
+    auto senderPort = uri.port();
+    asio::ip::udp::endpoint userEndPoint(asio::ip::address::from_string(senderIp), senderPort);
+    return userEndPoint;
+}
+
 bool SipServer::send(resip::SipMessage msg, asio::ip::udp::endpoint to) {
     size_t bytesSent = serverSocket->send_to(asio::buffer(toString(msg)),
                                              to);
@@ -67,11 +75,8 @@ void SipServer::onRegister(resip::SipMessage registerRequest) {
     //TODO Add contact to all responsed
     LOG(DEBUG) << "onRegister scenario";
     resip::NameAddr contact = registerRequest.header(resip::h_Contacts).front();
-    auto uri = contact.uri();
-    std::string userId = uri.user().c_str();
-    std::string senderIp = uri.host().c_str();
-    auto senderPort = uri.port();
-    asio::ip::udp::endpoint userEndPoint(asio::ip::address::from_string(senderIp), senderPort);
+    std::string userId = contact.uri().user().c_str();
+    auto userEndPoint = makeEndPoint(contact);
 
     resip::CallId callId = registerRequest.header(resip::h_CallId);
 
@@ -116,12 +121,26 @@ void SipServer::onRegister(resip::SipMessage registerRequest) {
     }
 }
 
+void SipServer::onUnsupported(resip::SipMessage unsupportedRequest) {
+    LOG(DEBUG) << "onUnsupported scenario";
+    resip::NameAddr contact = unsupportedRequest.header(resip::h_Contacts).front();
+    auto userEndPoint = makeEndPoint(contact);
+
+    auto response405 = *resip::Helper::makeResponse(unsupportedRequest, 405, contact);
+    send(response405, userEndPoint);
+}
+
 void SipServer::process(resip::SipMessage& incomingMessage) {
     LOG(DEBUG) << "process() ";
     if (resip::REGISTER == incomingMessage.method() ) {
         LOG(DEBUG) << "REGISTER method is observed";
         onRegister(incomingMessage);
         return;
+    }
+    else {
+        LOG(WARNING) << incomingMessage.methodStr() << " method is not supported";
+        onUnsupported(incomingMessage);
+
     }
     //TODO: Unsupported method
 }
