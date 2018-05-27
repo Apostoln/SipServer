@@ -25,12 +25,18 @@ class Nonce {
         resip::Data getValue();
 };
 
+enum class AuthResult {
+    OK,
+    USER_NOT_FOUND,
+    DIGEST_FAILED
+};
+
 class AuthManager {
     public:
         AuthManager(std::shared_ptr<Db> db);
         ~AuthManager();
         void addAuthParameters(resip::SipMessage& msg);
-        bool isAuth(resip::SipMessage& msg);
+        AuthResult isAuth(resip::SipMessage& msg);
 
     private:
         std::shared_ptr<Db> db;

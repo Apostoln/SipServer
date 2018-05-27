@@ -40,9 +40,9 @@ void AuthManager::addAuthParameters(resip::SipMessage& msg) {
     msg.header(resip::h_WWWAuthenticates).push_back(auth);
 }
 
-bool AuthManager::isAuth(resip::SipMessage& msg) {
+AuthResult AuthManager::isAuth(resip::SipMessage& msg) {
     if (!msg.exists(resip::h_Authorizations)) {
-        return false;
+        return AuthResult::DIGEST_FAILED;
     }
     auto authHeader = msg.header(resip::h_Authorizations).front();
 
@@ -52,7 +52,7 @@ bool AuthManager::isAuth(resip::SipMessage& msg) {
     auto accounts = db->storage.get_all<User>(where(c(&User::name) == usernameString));
     if (accounts.empty()) {
         LOG(WARNING) << "Account " << username  << " is not found";
-        return false;
+        return AuthResult::USER_NOT_FOUND;
     }
 
     const char* password = accounts.at(0).password.c_str();
@@ -67,9 +67,10 @@ bool AuthManager::isAuth(resip::SipMessage& msg) {
                                                           method,
                                                           uri,
                                                           nonce.getValue());
-    return response == authHeader.param(resip::p_response);
+    return response == authHeader.param(resip::p_response)
+           ? AuthResult::OK
+           : AuthResult::DIGEST_FAILED;
 }
-
 
 
 

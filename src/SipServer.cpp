@@ -64,6 +64,7 @@ std::shared_ptr<resip::SipMessage> SipServer::receive(resip::CallId callId) {
 }
 
 void SipServer::onRegister(resip::SipMessage registerRequest) {
+    //TODO Add contact to all responsed
     LOG(DEBUG) << "onRegister scenario";
     auto uri = registerRequest.header(resip::h_Contacts).front().uri();
     std::string userId = uri.user().c_str();
@@ -83,29 +84,36 @@ void SipServer::onRegister(resip::SipMessage registerRequest) {
     auto registerWithAuth = *receive(callId);
 
     //Check response
-    bool isAuthed = authManager->isAuth(registerWithAuth);
-
-    if (isAuthed) {
-        // Send 200 OK
-        auto response200 = *resip::Helper::makeResponse(registerWithAuth, 200);
-        send(response200, userEndPoint);
-
-        // Add to users
-        SipUser user(userId, userEndPoint);
-        if (registrar->addUser(user)) {
-            LOG(DEBUG) << "Adding account " << static_cast<std::string>(user);
+    AuthResult authResult = authManager->isAuth(registerWithAuth);
+    switch (authResult) {
+        case AuthResult::OK: {
+            // Add to users and send 200 OK
+            SipUser user(userId, userEndPoint);
+            if (registrar->addUser(user)) {
+                LOG(DEBUG) << "Adding account " << static_cast<std::string>(user);
+                // Send 200 OK
+                auto response200 = *resip::Helper::makeResponse(registerWithAuth, 200);
+                send(response200, userEndPoint);
+            }
+            else {
+                LOG(ERROR) << "Error adding user to db";
+            }
+            break;
         }
-        else {
-            //TODO: Response with 404 Not Found and 200OK only after adding user not before
-            //TODO: Case when user already registered on this location
+        case AuthResult::USER_NOT_FOUND: {
+            // Send 404 User not found
+            auto response404 = *resip::Helper::makeResponse(registerWithAuth, 404);
+            send(response404, userEndPoint);
+            break;
+        }
+        case AuthResult::DIGEST_FAILED: {
+            //send 401 and process again
+            LOG(DEBUG) << "User is unauthorized";
+            onRegister(registerWithAuth);
+            //TODO: Test this case
+            break;
         }
     }
-    else {
-        LOG(DEBUG) << "User is unauthorized";
-        onRegister(registerWithAuth); //send 401 and process again
-        //TODO: Test this case
-    }
-
 }
 
 void SipServer::process(resip::SipMessage& incomingMessage) {
@@ -115,6 +123,7 @@ void SipServer::process(resip::SipMessage& incomingMessage) {
         onRegister(incomingMessage);
         return;
     }
+    //TODO: Unsupported method
 }
 
 SipServer::SipServer():
