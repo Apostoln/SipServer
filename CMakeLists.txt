@@ -18,7 +18,7 @@ target_include_directories(easyloggingpp INTERFACE lib/easyloggingpp/src)
 
 include_directories(src)
 
-set(SOURCE_FILES main.cpp src/SipServer.hpp src/SipServer.cpp src/Builder.cpp src/Builder.hpp src/utils.hpp src/ErrorCode.hpp src/ExitException.cpp src/ExitException.hpp src/Registrar.cpp src/Registrar.hpp src/SipUser.hpp src/constants.hpp src/SipUser.cpp src/AuthManager.hpp src/AuthManager.cpp src/SipAccount.hpp src/SipAccount.cpp src/Db.hpp src/hash.hpp)
+set(SOURCE_FILES main.cpp src/SipServer.hpp src/SipServer.cpp src/Builder.cpp src/Builder.hpp src/utils/logHelper.hpp src/ErrorCode.hpp src/ExitException.cpp src/ExitException.hpp src/Registrar.cpp src/Registrar.hpp src/SipUser.hpp src/utils/constants.hpp src/SipUser.cpp src/AuthManager.hpp src/AuthManager.cpp src/SipAccount.hpp src/SipAccount.cpp src/Db.hpp src/utils/hash.hpp)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 

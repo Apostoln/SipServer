@@ -12,7 +12,7 @@
 
 #include <Registrar.hpp>
 #include <AuthManager.hpp>
-#include <hash.hpp>
+#include <utils/hash.hpp>
 
 class SipServer {
     private:

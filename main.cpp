@@ -16,8 +16,8 @@
 #include <AuthManager.hpp>
 #include <ExitException.hpp>
 #include <Registrar.hpp>
-#include <utils.hpp>
-#include <constants.hpp>
+#include <utils/logHelper.hpp>
+#include <utils/constants.hpp>
 
 #include <Db.hpp>
 

@@ -1,14 +1,12 @@
 #pragma once
-#ifndef SIPSERVER_UTILS_HPP
-#define SIPSERVER_UTILS_HPP
+#ifndef SIPSERVER_LOGHELPER_HPP
+#define SIPSERVER_LOGHELPER_HPP
 
 #include <algorithm>
-#include <sstream>
-#include <iostream>
+#include <vector>
 
 #include <easylogging++.h>
 
-#include <resip/stack/SipMessage.hxx>
 
 el::Level getLogLevel(std::string logLevel) {
     /*
@@ -83,4 +81,4 @@ void configureLogger(bool isConsoleOut, std::string loggingFile, el::Level logLe
 }
 
 
-#endif //SIPSERVER_UTILS_HPP
+#endif //SIPSERVER_LOGHELPER_HPP
