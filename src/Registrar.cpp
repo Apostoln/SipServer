@@ -40,3 +40,21 @@ bool Registrar::addUser(const SipUser &user) {
     }
     return true;
 }
+
+asio::ip::udp::endpoint Registrar::getEndPoint(const std::string& username) {
+    auto locations = db->storage.get_all<Location>(where(c(&User::name) == username));
+    auto location = locations[0];
+    std::string addressStr = location.address;
+    asio::ip::udp::endpoint endPoint;
+
+    auto it = std::find(addressStr.begin(), addressStr.end(), ':');
+    std::string ipAddressStr(addressStr.begin(), it);
+    std::string portStr(it+1, addressStr.end());
+
+    int port = std::stoi(portStr);
+
+    auto ipAddress = asio::ip::address::from_string(ipAddressStr);
+
+    return asio::ip::udp::endpoint(ipAddress, port);
+
+}

@@ -140,6 +140,13 @@ void SipServer::onInvite(resip::SipMessage inviteRequest) {
     auto cliEndPoint = makeEndPoint(contact);
 
     onAuth(inviteRequest, cliEndPoint, [](resip::SipMessage){});
+
+    auto cld = inviteRequest.header(resip::h_To).uri().user();
+    std::string cldString(cld.c_str());
+    auto cldEndPoint = registrar->getEndPoint(cldString);
+    send(inviteRequest, cldEndPoint);
+    //get cld location
+
 }
 
 void SipServer::onUnsupported(resip::SipMessage unsupportedRequest) {
