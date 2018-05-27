@@ -111,7 +111,6 @@ void SipServer::onRegister(resip::SipMessage registerRequest) {
             //send 401 and process again
             LOG(DEBUG) << "User is unauthorized";
             onRegister(registerWithAuth);
-            //TODO: Test this case
             break;
         }
     }
