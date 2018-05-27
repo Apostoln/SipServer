@@ -66,7 +66,8 @@ std::shared_ptr<resip::SipMessage> SipServer::receive(resip::CallId callId) {
 void SipServer::onRegister(resip::SipMessage registerRequest) {
     //TODO Add contact to all responsed
     LOG(DEBUG) << "onRegister scenario";
-    auto uri = registerRequest.header(resip::h_Contacts).front().uri();
+    resip::NameAddr contact = registerRequest.header(resip::h_Contacts).front();
+    auto uri = contact.uri();
     std::string userId = uri.user().c_str();
     std::string senderIp = uri.host().c_str();
     auto senderPort = uri.port();
@@ -75,7 +76,7 @@ void SipServer::onRegister(resip::SipMessage registerRequest) {
     resip::CallId callId = registerRequest.header(resip::h_CallId);
 
     // Send 401 with WWW-Authenticate
-    auto response401 = *resip::Helper::makeResponse(registerRequest, 401);
+    auto response401 = *resip::Helper::makeResponse(registerRequest, 401, contact);
     authManager->addAuthParameters(response401);
 
     send(response401, userEndPoint);
@@ -92,7 +93,7 @@ void SipServer::onRegister(resip::SipMessage registerRequest) {
             if (registrar->addUser(user)) {
                 LOG(DEBUG) << "Adding account " << static_cast<std::string>(user);
                 // Send 200 OK
-                auto response200 = *resip::Helper::makeResponse(registerWithAuth, 200);
+                auto response200 = *resip::Helper::makeResponse(registerWithAuth, 200, contact);
                 send(response200, userEndPoint);
             }
             else {
@@ -102,7 +103,7 @@ void SipServer::onRegister(resip::SipMessage registerRequest) {
         }
         case AuthResult::USER_NOT_FOUND: {
             // Send 404 User not found
-            auto response404 = *resip::Helper::makeResponse(registerWithAuth, 404);
+            auto response404 = *resip::Helper::makeResponse(registerWithAuth, 404, contact);
             send(response404, userEndPoint);
             break;
         }
