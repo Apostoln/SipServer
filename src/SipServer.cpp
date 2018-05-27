@@ -72,7 +72,6 @@ std::shared_ptr<resip::SipMessage> SipServer::receive(resip::CallId callId) {
 }
 
 void SipServer::onRegister(resip::SipMessage registerRequest) {
-    //TODO Add contact to all responsed
     LOG(DEBUG) << "onRegister scenario";
     resip::NameAddr contact = registerRequest.header(resip::h_Contacts).front();
     std::string userId = contact.uri().user().c_str();
@@ -142,7 +141,6 @@ void SipServer::process(resip::SipMessage& incomingMessage) {
         onUnsupported(incomingMessage);
 
     }
-    //TODO: Unsupported method
 }
 
 SipServer::SipServer():
@@ -247,7 +245,7 @@ void SipServer::updateSocket() {
 }
 
 void SipServer::run() {
-    asio::ip::udp::endpoint clientEndPoint; // TODO: Move into main loop?
+    asio::ip::udp::endpoint clientEndPoint;
 
     std::cout << "Server is started" << std::endl
               << "Listening UDP port " << this->getPort() << std::endl;
@@ -264,7 +262,7 @@ void SipServer::run() {
                 LOG(DEBUG) << "Dialogs are empty";
             }
             else {
-                LOG(DEBUG) << "Dialog : size"; //TODO: remove
+                LOG(DEBUG) << "Dialog : size";
                 for (auto &i: dialogs) {
                     LOG(DEBUG) << i.first << " : " << i.second.size();
                 }

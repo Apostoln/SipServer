@@ -52,7 +52,7 @@ inline auto initStorage(const std::string& path) {
 
 
 class Db {
-    public: //TODO: what to do with storage?
+    public:
         using Storage = decltype(initStorage(""));
         Storage storage;
 
@@ -74,7 +74,6 @@ class Db {
                 storage.replace(User{0, "123", "zzzxxx123"});
             }
             catch (std::system_error& se) {
-                //TODO: check error_code or error_category
                 LOG(ERROR) << se.code() << " " << se.what();
             }
         }
